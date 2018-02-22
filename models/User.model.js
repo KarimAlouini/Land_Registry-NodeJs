@@ -24,7 +24,8 @@ var userSchema = new Schema({
     },
     cin:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
     dob:{
         type:Date,
