@@ -14,7 +14,9 @@ router.post('/add',function (req,res) {
         cin:req.body.cin,
         email:req.body.email,
         password:req.body.email,
-        login:req.body.login
+        login:req.body.login,
+        walletId:'xxxx'
+
     });
 
     u.save(function (err,u) {

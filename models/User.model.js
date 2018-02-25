@@ -30,7 +30,13 @@ var userSchema = new Schema({
     dob:{
         type:Date,
         default:Date.now
+    },
+    walletId:{
+        type:String,
+        required:true
     }
+    //roles
+    //user's adding
 
 });
 module.exports = mongoose.model('User',userSchema);

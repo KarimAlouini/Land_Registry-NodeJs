@@ -4,10 +4,10 @@ var mongoose = require('mongoose'),
 
 var landSchema = new Schema({
 
-   owners:[{
+   owner:{
        type:Schema.ObjectId,
        ref:'User'
-   }],
+   },
     localisation:{
        address:{
            street:String,
@@ -21,7 +21,11 @@ var landSchema = new Schema({
         },
         documents:[{
            name:String,
-            checksum:String
+            checksum:String,
+            dateAdded:{
+               type:Date,
+                default:Date.now
+            }
         }]
     }
 
