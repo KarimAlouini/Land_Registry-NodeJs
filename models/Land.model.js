@@ -6,7 +6,8 @@ var landSchema = new Schema({
 
    owner:{
        type:Schema.ObjectId,
-       ref:'User'
+       ref:'User',
+       required:true
    },
     localisation:{
        address:{

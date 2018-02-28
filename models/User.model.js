@@ -31,7 +31,7 @@ var userSchema = new Schema({
         type:Date,
         default:Date.now
     },
-    walletId:{
+    blockchainAddress:{
         type:String,
         required:true
     }

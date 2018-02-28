@@ -2,10 +2,6 @@ var express = require('express');
 var router = express.Router();
 var User = require('../models/User.model');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
 
 router.post('/add',function (req,res) {
     var u = new User({
@@ -19,12 +15,30 @@ router.post('/add',function (req,res) {
 
     });
 
-    u.save(function (err,u) {
-        if(err)
-          throw  err;
-        console.log(u);
+
+
+    var u = new User(JSON.parse(JSON.stringify(req.body)));
+
+
+    u.save().then(function () {
+        console.log('ok');
+    }).catch(function (reason) {
+        console.log(reason);
     });
-    res.send('hi');
+
+    res.status(400).send();
+
+
+});
+
+
+router.get('/',function (req,res) {
+    User.find({},function (err,us) {
+        console.log(us);
+        res.json(us);
+    });
+
+
 });
 
 module.exports = router;
