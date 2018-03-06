@@ -1,5 +1,6 @@
-var mongoose = require('mongoose');
-var Schema =  mongoose.Schema;
+var mongoose = require('mongoose'),
+    Schema =  mongoose.Schema,
+    documentSchema = require('./Document.schema');
 
 var userSchema = new Schema({
     login:{
@@ -22,19 +23,19 @@ var userSchema = new Schema({
         type:String,
         required:true
     },
-    cin:{
+    idCard:{
         type:String,
         required:true,
         unique:true
     },
-    dob:{
-        type:Date,
-        default:Date.now
-    },
+
     blockchainAddress:{
         type:String,
         required:true
-    }
+    },
+    documents:[
+        documentSchema
+    ]
     //roles
     //user's adding
 

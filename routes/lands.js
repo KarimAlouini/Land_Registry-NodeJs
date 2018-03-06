@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Land = require('../models/Land.model');
+var formidable = require('formidable');
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
@@ -22,12 +23,15 @@ router.post('/add',function (req,res) {
                 latitude:36
             }
         }
+    })
+
+    var form = formidable.IncomingForm();
+    form.parse(req,(err,fields,files)=>{
+        console.log(err);
+        console.log(fields);
+        console.log(files);
     });
-    l.save(function (err,l) {
-       if (err)
-           throw err;
-        console.log(l);
-    });
+    console.log(req.body);
     res.send('hi');
 });
 
