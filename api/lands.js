@@ -163,5 +163,15 @@ router.get('/:address/:privateKey',function (req,res) {
     }
 );
 
+router.get('/transactionStatus/:hash',function (req,res) {
+    var hash=req.params.hash;
+    var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/'));
 
+    web3.eth.getTransactionReceipt(hash,function (err,data) {
+        if(!err)
+            res.send(data);
+        else
+            res.send(err);
+    })
+});
 module.exports=router;
