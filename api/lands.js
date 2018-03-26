@@ -37,17 +37,12 @@ var abi =[
         "constant": false,
         "inputs": [
             {
-                "name": "_a",
-                "type": "uint256"
+                "name": "_address",
+                "type": "address"
             }
         ],
-        "name": "justTest",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
+        "name": "addAgent",
+        "outputs": [],
         "payable": false,
         "stateMutability": "nonpayable",
         "type": "function"
@@ -83,6 +78,44 @@ var abi =[
         "constant": true,
         "inputs": [
             {
+                "name": "_senderAddress",
+                "type": "address"
+            }
+        ],
+        "name": "accessCheck",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "agents",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
                 "name": "",
                 "type": "address"
             },
@@ -109,30 +142,16 @@ var abi =[
         "payable": false,
         "stateMutability": "view",
         "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "tt",
-        "outputs": [
-            {
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
     }
 ];
 
-router.get('/:address/:privateKey',function (req,res) {
+router.post('/:address/:privateKey',function (req,res) {
 
         var address=String(req.params.address);
         var senderPrivateKey=String(req.params.privateKey);
         var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
         var DataPassContract = web3.eth.contract(abi);
-        var dataPass = DataPassContract.at('0x882c86afeda425d319e6ad7f5316b68155dd5626');
+        var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
         var contactFunction = dataPass.add.getData(String(address),'2','ben','rouha');
         var number = web3.eth.getTransactionCount(address,"pending");
@@ -142,7 +161,7 @@ router.get('/:address/:privateKey',function (req,res) {
             gasPrice: web3.toHex(web3.toWei('1000','gwei')),
             gasLimit: web3.toHex(3000000),
             from : address,
-            to: '0x882c86afeda425d319e6ad7f5316b68155dd5626', // contract address
+            to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
             value: '0x00',
             data: String(contactFunction)
         };
@@ -174,4 +193,21 @@ router.get('/transactionStatus/:hash',function (req,res) {
             res.send(err);
     })
 });
+
+router.get('/accessCheck/:address',function (req,res) {
+    var address=String(req.params.address);
+    var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/'));
+    var DataPassContract = web3.eth.contract(abi);
+    var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+    dataPass.accessCheck.call(address,function(err, result) {
+        if(err) {
+            res.send('f');
+        } else {
+            res.send(result);
+        }
+    });
+
+
+});
+
 module.exports=router;
