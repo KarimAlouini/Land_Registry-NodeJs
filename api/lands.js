@@ -209,5 +209,41 @@ router.get('/accessCheck/:address',function (req,res) {
 
 
 });
+router.post('/addAgent/:address/:privateKey',function (req,res) {
 
+        var address=String(req.params.address);
+        var agentAddress=String(req.body.address);
+        var senderPrivateKey=String(req.params.privateKey);
+        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
+        var DataPassContract = web3.eth.contract(abi);
+        var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+        var privateKey = new Buffer(senderPrivateKey, 'hex');
+        var contactFunction = dataPass.addAgent.getData(agentAddress);
+        var number = web3.eth.getTransactionCount(address,"pending");
+        console.log(web3.version);
+        var rawTx = {
+            nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
+            gasPrice: web3.toHex(web3.toWei('1000','gwei')),
+            gasLimit: web3.toHex(3000000),
+            from : address,
+            to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
+            value: '0x00',
+            data: String(contactFunction)
+        };
+
+        var tx = new Tx(rawTx);
+        tx.sign(privateKey);
+
+        var serializedTx = tx.serialize();
+        var raw = '0x' + serializedTx.toString('hex');
+        web3.eth.sendRawTransaction(raw,function (err,data) {
+            if(!err)
+
+                res.send(data);
+            else
+                res.send(err);
+        });
+
+    }
+);
 module.exports=router;
