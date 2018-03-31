@@ -254,28 +254,28 @@ router.post('/addAgent/:address/:privateKey',function (req,res) {
     }
 );
 router.get('/GetLandsFromCache',function (req,res) {
-   /* request.get('http://54.76.154.101',
-        function (error,response,body) {
-            if(error)
-            {
-                throw error;
-            }
-            else {
-                res.json(JSON.parse(body));
-            }
-        })
+    /* request.get('http://54.76.154.101',
+         function (error,response,body) {
+             if(error)
+             {
+                 throw error;
+             }
+             else {
+                 res.json(JSON.parse(body));
+             }
+         })
 
-    Lands.find({},function (err,result) {
-        if(err){
-            res.send(err);
-        }
-        if(!result){
-            res.status(404).send();
+     Lands.find({},function (err,result) {
+         if(err){
+             res.send(err);
+         }
+         if(!result){
+             res.status(404).send();
 
-        }else{
-            res.json(result);
-        }});
-*/
+         }else{
+             res.json(result);
+         }});
+ */
     getLogsFromCache().then(function(result){
         res.json(result);
     }).catch(function(error){
@@ -297,6 +297,25 @@ function getLogsFromCache(){
             })
     })
 }
+
+
+router.get('/',function (req,res) {
+    Lands.find({},function (err,data) {
+        if (err)
+            res.status(500).send();
+        else{
+            res.json(data);
+        }
+    })
+});
+router.post('/add',function (req,res) {
+    var new_land =new Lands(req.body);
+    new_land.save(function (err,data) {
+        if (err)
+            res.send(err);
+        res.json(data);
+    })
+});
 
 
 module.exports=router;
