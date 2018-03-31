@@ -1,0 +1,82 @@
+
+<html>
+<head>
+    <script src="http://maps.googleapis.com/maps/api/js"></script>
+    <script>
+        function initialize()
+        {
+            var delhi = new google.maps.LatLng(37.035133779254885, 10.177481176968968);
+            var kolkata = new google.maps.LatLng(37.036405445276834,10.176601412412083);
+            var mumbai = new google.maps.LatLng(37.035133779254885, 10.176215174313938);
+
+            var mapProp = {
+                center:delhi,
+                zoom:10,
+                mapTypeId:google.maps.MapTypeId.ROADMAP
+            };
+            var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
+
+            var marker = [
+                new google.maps.Marker({
+                    Name:'Mumbai Business Center',
+                    position:mumbai,
+                    animation:google.maps.Animation.BOUNCE
+                }),
+                new google.maps.Marker({
+                    Name:'Delhi Capital of India',
+                    position:delhi,
+                    animation:google.maps.Animation.BOUNCE
+                }),
+                new google.maps.Marker({
+                    Name:'Kolkata Heritage City',
+                    position:kolkata,
+                    animation:google.maps.Animation.BOUNCE
+                })
+            ];
+
+            var flightPath = new google.maps.Polyline({
+                path:[mumbai,delhi,kolkata,mumbai],
+                strokeColor: "#FF0000",
+                strokeOpacity:0.4 ,
+                strokeWeight:2,
+                fillColor:"#0000FF",
+                fillOpacity:0.4
+            });
+
+            flightPath.setMap(map);
+
+            var myCity  = new google.maps.Circle({
+                center:kolkata,
+                strokeColor:"#FF0000",
+                strokeOpacity:0.5,
+                strokeWeight:2,
+                fillColor:"#FF0000",
+                fillOpacity:0.4
+            });
+
+            myCity.setMap(map);
+
+            for(i=0;i<marker.length;i++)
+            {
+                var m = marker[i];
+                m.setMap(map);
+                var infoWindow = new google.maps.InfoWindow({
+                    content:m.Name
+                });
+
+                infoWindow.open(map,m);
+
+                google.maps.event.addListener(m,'click',function(){
+                    map.setZoom(8);
+                    map.setCenter(m.getPosition());
+                });
+            }
+        }
+        google.maps.event.addDomListener(window,'load',initialize);
+    </script>
+</head>
+<body>
+<div id="googleMap" style="width:1200px; height:800px">
+</div>
+</body>
+</html>
