@@ -1,20 +1,22 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var app = express();
+
+var server = require('http').createServer(app)
+var io = require('socket.io')(server)
 
 var index = require('./routes/index');
 var users = require('./routes/users'),
     lands = require('./routes/lands');
 var landsApi = require('./api/lands');
 
-var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'twig');
 
 
 // uncomment after placing your favicon in /public
@@ -45,7 +47,11 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  //res.render('error');
 });
+
+
+
+
 
 module.exports = app;

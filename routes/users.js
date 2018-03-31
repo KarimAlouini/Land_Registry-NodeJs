@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/User.model');
+var passport = require('passport');
 
 
 router.post('/add',function (req,res) {
@@ -38,6 +39,15 @@ router.get('/',function (req,res) {
         res.json(us);
     });
 
+
+});
+
+
+router.get('/info/:address',(req,res)=>{
+    User.findOne({blockchainAddress:req.params.address},(err,data)=>{
+        console.log(data);
+        res.render('navbar',{login:data.login});
+    })
 
 });
 

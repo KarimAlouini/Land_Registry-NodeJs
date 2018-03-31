@@ -1,19 +1,28 @@
 var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+    Schema = mongoose.Schema,
 
 
-var documentSchema = new Schema({
+ documentSchema = new Schema({
 
 
-        name: String,
-        checksum:
-        String,
-        dateAdded:
+        hash: {
+            type: String,
+            required: true,
+
+        },
+        docs: [
             {
-                type: Date,
-                default:
-                Date.now
+                name: String,
+                checksum:
+                String,
+                dateAdded:
+                    {
+                        type: Date,
+                        default:
+                        Date.now
+                    }
             }
+        ]
 
 
     })

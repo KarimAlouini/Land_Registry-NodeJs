@@ -7,6 +7,7 @@ var mongoose = require('mongoose'),
 var landSchema = new Schema({
 
     owner: {
+
         type: Schema.ObjectId,
         ref: 'User',
         required: true
@@ -27,11 +28,10 @@ var landSchema = new Schema({
             required: true,
             validation:function(v){
                 const shapes = ['rectangular ','triangular ','irregular'];
-                return _.indexOf(shapes,v) == -1 ;
+                return _.indexOf(shapes,v) !== -1 ;
             }
         },
-        documents: [documentSchema
-        ],
+        documents: documentSchema,
         adjacentLands: [{
             type: Schema.ObjectId,
             ref: 'Land'
