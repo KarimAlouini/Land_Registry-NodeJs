@@ -181,7 +181,7 @@ router.post('/addLand',function (req,res) {
         web3.eth.sendRawTransaction(raw,function (err,data) {
             if(!err)
 
-                res.send(data);
+                res.send("this is the Tx hash :"+data);
             else
                 res.send(err);
         });
