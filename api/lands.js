@@ -1,11 +1,14 @@
 var express = require('express');
 var router = express.Router();
+var Lands = require('../models/Land.model');
+const request= require('request')
 var Web3 = require('web3');
 var bodyParser = require('body-parser');
 var privateKey = new Buffer('922bd7a49e2496bf1c3c9b27e71eb1439988f80bf5854034be3d0eabd753660b', 'hex');
 const Tx = require('ethereumjs-tx');
 var app = express();
 app.use(bodyParser.json());
+
 var abi =[
     {
         "constant": false,
@@ -246,4 +249,48 @@ router.post('/addAgent/:address/:privateKey',function (req,res) {
 
     }
 );
+router.get('/GetLandsFromCache',function (req,res) {
+   /* request.get('http://54.76.154.101',
+        function (error,response,body) {
+            if(error)
+            {
+                throw error;
+            }
+            else {
+                res.json(JSON.parse(body));
+            }
+        })
+
+    Lands.find({},function (err,result) {
+        if(err){
+            res.send(err);
+        }
+        if(!result){
+            res.status(404).send();
+
+        }else{
+            res.json(result);
+        }});
+*/
+    getLogsFromCache().then(function(result){
+        res.json(result);
+    }).catch(function(error){
+        res.send(error);
+    })
+});
+
+function getLogsFromCache(){
+    return new Promise(function(resolve,reject){
+        request('http://54.76.154.101',
+            function (error,response,body) {
+                if(error)
+                {
+                    reject(" problem ");
+                }
+                else {
+                    resolve(JSON.parse(body));
+                }
+            })
+    })
+}
 module.exports=router;
