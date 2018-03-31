@@ -1,11 +1,13 @@
 var mongoose = require('mongoose'),
     Schema =  mongoose.Schema,
-    documentSchema = require('./Document.schema');
+    documentSchema = require('./Document.schema'),
+    _ = require('underscore'),
 
-var userSchema = new Schema({
+ userSchema = new Schema({
     login:{
         type:String,
-        required:true
+        required:true,
+        trim:true
     },
     password:{
         type:String,
@@ -13,31 +15,39 @@ var userSchema = new Schema({
     },
     email:{
         type:String,
-        required:true
+        required:true,
+        trim:true
     },
     fName:{
         type:String,
-        required:true
+        required:true,
+        trim:true
     },
     lName:{
         type:String,
-        required:true
+        required:true,
+        trim:true
     },
     idCard:{
         type:String,
         required:true,
-        unique:true
+        unique:true,
+        trim:true
     },
 
     blockchainAddress:{
         type:String,
-        required:true
+        required:true,
+        trim:true
     },
-    documents:[
-        documentSchema
-    ]
-    //roles
-    //user's adding
+    documents:documentSchema,
+     role:{
+        type:String,
+         default:'User',
+         validate:(v)=>{
+             return _.indexOf(['User','Agent'],v) !== -1;
+         }
+     }
 
 });
 module.exports = mongoose.model('User',userSchema);
