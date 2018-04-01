@@ -12,9 +12,9 @@ var connection = mongoose.connect('mongodb://quadra:quadra@34.252.123.72:27017/l
 
 connection
     .then(()=>{
-        console.log('ok');
+        console.log('database connection established');
     })
     .catch(()=>{
-        console.log('error');
+        console.log('error connecting to database');
     });
 module.exports = mongoose.connection;
