@@ -19,24 +19,29 @@ var landSchema = new Schema({
         number: Number,
         zipCode: Number,
 
-        coordinates: {
-            longitude: Number,
-            latitude: Number
-        },
-        shape: {
-            type: String,
-            required: true,
-            validation:function(v){
-                const shapes = ['rectangular ','triangular ','irregular'];
-                return _.indexOf(shapes,v) !== -1 ;
-            }
-        },
-        documents: documentSchema,
+
+
+
         adjacentLands: [{
             type: Schema.ObjectId,
             ref: 'Land'
         }]
-    }
+    },
+    documents: documentSchema,
+    pins:[{
+        longitude:{
+            type:Number,
+            required:true
+        },
+        latitude:{
+            type:Number,
+            required:true
+        },
+        reference:{
+            type:String,
+            required:true
+        }
+    }]
 
 });
 module.exports = mongoose.model('Land', landSchema);

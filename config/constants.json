@@ -1,0 +1,142 @@
+{
+  "contractAddress":"0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b",
+  "providerAddress":"http://34.246.20.177:8545",
+  "contractAbi":[
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_address",
+          "type": "address"
+        },
+        {
+          "name": "_idInDB",
+          "type": "string"
+        },
+        {
+          "name": "_hashedInfos",
+          "type": "string"
+        },
+        {
+          "name": "_hashDocs",
+          "type": "string"
+        }
+      ],
+      "name": "add",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "addAgent",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "MyAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "idInDB",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "hashedInfos",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "hashDocs",
+          "type": "string"
+        }
+      ],
+      "name": "LogReturn",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_senderAddress",
+          "type": "address"
+        }
+      ],
+      "name": "accessCheck",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "agents",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "properties",
+      "outputs": [
+        {
+          "name": "idInDB",
+          "type": "string"
+        },
+        {
+          "name": "hashedInfos",
+          "type": "string"
+        },
+        {
+          "name": "hashDocs",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

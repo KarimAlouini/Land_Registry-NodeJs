@@ -12,9 +12,9 @@ var connection = mongoose.connect('mongodb://127.0.0.1/land_registry');
 
 connection
     .then(()=>{
-        console.log('ok');
+        console.log('database connection established');
     })
     .catch(()=>{
-        console.log('error');
+        console.log('error connecting to database');
     });
 module.exports = mongoose.connection;
