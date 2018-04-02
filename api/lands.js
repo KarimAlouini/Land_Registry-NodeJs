@@ -160,7 +160,7 @@ router.post('/addLand',function (req,res) {
 
         var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
-        var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+        var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
         var contactFunction = dataPass.add.getData(String(address),idland,hashedInfos,hashDocs);
         var number = web3.eth.getTransactionCount(address,"pending");
@@ -170,7 +170,7 @@ router.post('/addLand',function (req,res) {
             gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
             gasLimit: web3.toHex(3000000),
             from: address,
-            to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
+            to: '0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e', // contract address
             value: '0x00',
             data: String(contactFunction)
         };
@@ -213,7 +213,7 @@ router.get('/accessCheck/:address',function (req,res) {
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
     dataPass.accessCheck.call(address,function(err, result) {
         if(err) {
-            res.send('f');
+            res.send('a problem');
         } else {
             res.send(result);
         }
@@ -221,11 +221,11 @@ router.get('/accessCheck/:address',function (req,res) {
 
 
 });
-router.post('/addAgent/:address/:privateKey',function (req,res) {
+router.post('/addAgent',function (req,res) {
 
-        var address=String(req.params.address);
-        var agentAddress=String(req.body.address);
-        var senderPrivateKey=String(req.params.privateKey);
+        var address=String(req.body.SenderAddress);
+        var agentAddress=String(req.body.AgentAddress);
+        var senderPrivateKey=String(req.body.privateKey);
         var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
@@ -259,30 +259,22 @@ router.post('/addAgent/:address/:privateKey',function (req,res) {
     }
 );
 router.get('/GetLandsFromCache',function (req,res) {
-   /* request.get('http://54.76.154.101',
-        function (error,response,body) {
-            if(error)
-            {
-                throw error;
+    getLogsFromCache().then(function(LogResult){
+        var convertedLands=[];
+        Lands.find({},function (err,DBResult) {
+            if(err){
+                res.send(err);
             }
-            else {
-                res.json(JSON.parse(body));
-            }
-        })
-
-    Lands.find({},function (err,result) {
-        if(err){
-            res.send(err);
-        }
-        if(!result){
-            res.status(404).send();
-
-        }else{
-            res.json(result);
-        }});
-*/
-    getLogsFromCache().then(function(result){
-        res.json(result);
+            else{
+                LogResult.forEach(function (object) {
+                var x   =   DBResult.find(function (element) {
+                      return  element._id==object.id;
+                   });
+                if(x != undefined)
+                convertedLands.push(x);
+                });
+                res.json(convertedLands);
+            }});
     }).catch(function(error){
         res.send(error);
     })
@@ -290,7 +282,7 @@ router.get('/GetLandsFromCache',function (req,res) {
 
 function getLogsFromCache(){
     return new Promise(function(resolve,reject){
-        request('http://54.76.154.101',
+        request('http://54.76.154.101:3000',
             function (error,response,body) {
                 if(error)
                 {
