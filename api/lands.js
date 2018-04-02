@@ -158,7 +158,7 @@ router.post('/addLand',function (req,res) {
         var hashedInfos = String(req.body.hashedInfos);
         var hashDocs = String(req.body.hashDocs);
 
-        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
+        var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
@@ -196,7 +196,7 @@ router.post('/addLand',function (req,res) {
 
 router.get('/transactionStatus/:hash', function (req, res) {
     var hash = req.params.hash;
-    var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/'));
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
 
     web3.eth.getTransactionReceipt(hash,function (err,data) {
         if(!err)
@@ -208,7 +208,7 @@ router.get('/transactionStatus/:hash', function (req, res) {
 
 router.get('/accessCheck/:address',function (req,res) {
     var address=String(req.params.address);
-    var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/'));
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
     dataPass.accessCheck.call(address,function(err, result) {
@@ -226,7 +226,7 @@ router.post('/addAgent/:address/:privateKey',function (req,res) {
         var address=String(req.params.address);
         var agentAddress=String(req.body.address);
         var senderPrivateKey=String(req.params.privateKey);
-        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
+        var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
