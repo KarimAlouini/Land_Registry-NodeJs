@@ -2,29 +2,19 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
 
 
- documentSchema = new Schema({
+    documentSchema = new Schema({
 
 
-        hash: {
-            type: String,
-            required: true,
-
-        },
-        docs: [
+        name: String,
+        hash: String,
+        dateAdded:
             {
-                name: String,
-                checksum:
-                String,
-                dateAdded:
-                    {
-                        type: Date,
-                        default:
-                        Date.now
-                    }
+                type: Date,
+                default:
+                Date.now
             }
-        ]
 
 
     })
 ;
-module.exports = documentSchema;
+module.exports = mongoose.model('Document', documentSchema);

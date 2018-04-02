@@ -6,49 +6,57 @@ var mongoose = require('mongoose'),
 
 var landSchema = new Schema({
 
-    salePrice:{
-        type:Number,
-        required:false
+    salePrice: {
+        type: Number,
+        required: false
     },
-    isForSale:{
-        type:Boolean,
-        default:false
+    isForSale: {
+        type: Boolean,
+        default: false
     },
     owner: {
 
         type: Schema.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        validation: {
+            message: 'Owner is required'
+        }
     },
     localization: {
 
         street: String,
         city: String,
         number: Number,
-        zipCode: Number,
-
-
-
-
-        adjacentLands: [{
-            type: Schema.ObjectId,
-            ref: 'Land'
-        }]
+        zipCode: Number
     },
-    documents: documentSchema,
-    pins:[{
-        longitude:{
-            type:Number,
-            required:true
+    documents: [{
+
+        name: String,
+        hash: String,
+        dateAdded:
+            {
+                type: Date,
+                default:
+                Date.now
+            }
+    }],
+    pins: [{
+        longitude: {
+            type: Number,
+            required: true,
+            validation: {
+                message: 'Longitude is required'
+            }
         },
-        latitude:{
-            type:Number,
-            required:true
-        },
-        reference:{
-            type:String,
-            required:true
+        latitude: {
+            type: Number,
+            required: true,
+            validation: {
+                message: 'Latitude is required'
+            }
         }
+
     }]
 
 });
