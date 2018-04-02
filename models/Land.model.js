@@ -6,6 +6,14 @@ var mongoose = require('mongoose'),
 
 var landSchema = new Schema({
 
+    salePrice:{
+        type:Number,
+        required:false
+    },
+    isForSale:{
+        type:Boolean,
+        default:false
+    },
     owner: {
 
         type: Schema.ObjectId,
