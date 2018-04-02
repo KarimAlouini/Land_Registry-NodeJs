@@ -12,6 +12,7 @@ var index = require('./routes/index');
 var users = require('./routes/users'),
     lands = require('./routes/lands');
 var landsApi = require('./api/lands');
+var landDbApi = require('./api/landDb');
 
 
 // view engine setup
@@ -31,6 +32,7 @@ app.use('/', index);
 app.use('/users', users);
 app.use('/lands',lands);
 app.use('/api/lands',landsApi);
+app.use('/api/landDb',landDbApi);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

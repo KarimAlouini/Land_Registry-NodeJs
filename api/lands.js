@@ -156,7 +156,8 @@ router.post('/addLand',function (req,res) {
         var hashedInfos=String(req.body.hashedInfos);
         var hashDocs=String(req.body.hashDocs);
 
-        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
+        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/'));
+        console.log(web3.isConnected());
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
@@ -221,8 +222,9 @@ router.post('/addAgent/:address/:privateKey',function (req,res) {
         var address=String(req.params.address);
         var agentAddress=String(req.body.address);
         var senderPrivateKey=String(req.params.privateKey);
-        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
-        var DataPassContract = web3.eth.contract(abi);
+        var web3 = new Web3(new Web3.providers.HttpProvider('http://34.252.123.72:8545'));
+    console.log(web3.isConnected());
+    var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
         var contactFunction = dataPass.addAgent.getData(agentAddress);
