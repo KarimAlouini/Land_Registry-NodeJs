@@ -213,7 +213,7 @@ router.get('/accessCheck/:address',function (req,res) {
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
     dataPass.accessCheck.call(address,function(err, result) {
         if(err) {
-            res.send('f');
+            res.send('a problem');
         } else {
             res.send(result);
         }
@@ -221,11 +221,11 @@ router.get('/accessCheck/:address',function (req,res) {
 
 
 });
-router.post('/addAgent/:address/:privateKey',function (req,res) {
+router.post('/addAgent',function (req,res) {
 
-        var address=String(req.params.address);
-        var agentAddress=String(req.body.address);
-        var senderPrivateKey=String(req.params.privateKey);
+        var address=String(req.body.SenderAddress);
+        var agentAddress=String(req.body.AgentAddress);
+        var senderPrivateKey=String(req.body.privateKey);
         var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
