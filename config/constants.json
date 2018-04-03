@@ -138,5 +138,7 @@
       "stateMutability": "view",
       "type": "function"
     }
-  ]
+  ],
+  "appPublicKey":"0x677ed04cafa0b5367eb13607a2367a5e870c8ba2",
+  "appPrivateKey":"5E97DCED10E52151F7CF84973072E6E4C65AA9D841A51C602A6B8CDD53205E30"
 }

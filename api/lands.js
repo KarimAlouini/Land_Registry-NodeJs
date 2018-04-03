@@ -10,6 +10,13 @@ const Tx = require('ethereumjs-tx');
 var app = express();
 var config = require('../config/constants');
 app.use(bodyParser.json());
+var async = require('async');
+var sha256 = require('sha256');
+var _ = require('underscore');
+var utils = require('../utils/utils');
+var fs = require('fs');
+var path = require('path');
+var crypto = require('crypto-js');
 
 var abi =[
     {
@@ -301,23 +308,176 @@ function getLogsFromCache(){
     })
 }
 
+router.post('/add', (req, res) => {
+    console.log("hiii");
 
-router.get('/', function (req, res) {
-    Lands.find({}, function (err, data) {
+
+    var land;
+    try {
+        land = JSON.parse(req.body.land);
+    } catch (e) {
+        res.status(500).send();
+    }
+
+    var pinsHash = sha256(JSON.stringify(land.pins));
+
+    Lands.find({
+        owner: land.owner,
+
+    }, function (err, result) {
         if (err)
-            res.status(500).send();
+            res.status(500).send(err);
         else {
-            res.json(data);
+
+            var notExists = result.every((element) => {
+                var myPins = sha256(JSON.stringify(utils.pickFromArray(element.pins, 'longitude', 'latitude')));
+
+
+                /*if (myPins === pinsHash) {
+                    exists = true;
+                    console.log('exists true');
+                    res.status(201).json({
+                        code: 1,
+                        message: 'Land already exists'
+                    });
+
+
+                }*/
+
+                var a = result.filter((x) => {
+
+                    var myPins = sha256(JSON.stringify(utils.pickFromArray(x.pins, 'longitude', 'latitude')));
+
+                    return myPins === pinsHash;
+                });
+
+                if (a.length > 0) {
+                    res.status(201).json({
+                        code: 1,
+                        message: 'Land already exists'
+                    });
+                    return false;
+                }
+
+
+            });
+
+
+            console.log("exist");
+
+            if (notExists) {
+
+                if (!req.files.documents) {
+                    res.status(201).json({
+                        code: 1,
+                        message: 'Documents are required'
+                    });
+                }
+                else {
+
+                    var files = [];
+
+
+                    console.log('start upload');
+
+                    var landPath = path.join(__dirname, '..', 'public', 'docs', pinsHash);
+                    if (!fs.existsSync(landPath)) {
+                        fs.mkdirSync(landPath);
+
+
+                    }
+
+
+                    if (isNaN(req.files.documents.length)) {
+                        console.log('single file');
+                        files.push(req.files.documents);
+                        //if it's single file
+                        req.files.documents.mv(path.join(landPath, req.files.documents.name), (err) => {
+                            if (err) {
+                                console.log(err);
+                                res.status(500).send();
+
+                            }
+                            else {
+                                files.push(req.files.documents);
+                            }
+
+
+                        });
+                    }
+                    else {
+                        console.log('too many files');
+                        files = req.files.documents;
+                        //if it's an array
+                        async.forEachOf(req.files.documents, (element) => {
+
+                            element.mv(path.join(landPath, element.name), (err) => {
+                                if (err) {
+
+
+                                    res.status(500).send();
+
+                                }
+                                else {
+                                    console.log('no error during upload');
+                                    files.push(element);
+                                }
+
+
+                            });
+                        });
+
+
+                    }
+
+
+                    console.log(files.length);
+
+
+                    var l = new Lands(land);
+                    l.documents = [];
+
+                    var hashes = '';
+                    async.forEachOf(files, (file) => {
+
+                        var readStream = fs.createReadStream(path.join(landPath, file.name));
+                        var chunks = '';
+                        readStream.on('data', function (chunk) {
+
+
+                            chunks += chunk;
+                        })
+
+                            .on('end', function () {
+
+                                console.log(sha256(chunks));
+                                hashes +=chunks;
+                                l.documents.push({
+                                    name:file.name,
+                                    hash:sha256(chunks)
+
+                                })
+                            })
+                    });
+
+
+
+
+                    l.save((err, data) => {
+                        if (err)
+                            res.status(500).send();
+                        console.log('added to database');
+                        res.json(data);
+                    })
+                }
+
+
+            }
+
         }
-    })
-});
-router.post('/add', function (req, res) {
-    var new_land = new Lands(req.body);
-    new_land.save(function (err, data) {
-        if (err)
-            res.send(err);
-        res.json(data);
-    })
+
+    });
+
 });
 router.post('/generatToken',function (req,res) {
     jwt.sign(req.body,'quadraSecretKey',{expiresIn:'1h'},function (err,token) {
@@ -341,5 +501,10 @@ function verifyToken(req,res,next) {
 
 
 }
+
+
+
+
+
 
 module.exports = router;
