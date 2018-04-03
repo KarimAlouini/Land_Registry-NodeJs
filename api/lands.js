@@ -9,6 +9,13 @@ const Tx = require('ethereumjs-tx');
 var app = express();
 var config = require('../config/constants');
 app.use(bodyParser.json());
+var async = require('async');
+var sha256 = require('sha256');
+var _ = require('underscore');
+var utils = require('../utils/utils');
+var fs = require('fs');
+var path = require('path');
+var crypto = require('crypto-js');
 
 var abi =[
     {
@@ -160,7 +167,7 @@ router.post('/addLand',function (req,res) {
 
         var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
-        var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+        var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
         var contactFunction = dataPass.add.getData(String(address),idland,hashedInfos,hashDocs);
         var number = web3.eth.getTransactionCount(address,"pending");
@@ -170,7 +177,7 @@ router.post('/addLand',function (req,res) {
             gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
             gasLimit: web3.toHex(3000000),
             from: address,
-            to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
+            to: '0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e', // contract address
             value: '0x00',
             data: String(contactFunction)
         };
@@ -213,7 +220,7 @@ router.get('/accessCheck/:address',function (req,res) {
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
     dataPass.accessCheck.call(address,function(err, result) {
         if(err) {
-            res.send('f');
+            res.send('a problem');
         } else {
             res.send(result);
         }
@@ -221,11 +228,11 @@ router.get('/accessCheck/:address',function (req,res) {
 
 
 });
-router.post('/addAgent/:address/:privateKey',function (req,res) {
+router.post('/addAgent',function (req,res) {
 
-        var address=String(req.params.address);
-        var agentAddress=String(req.body.address);
-        var senderPrivateKey=String(req.params.privateKey);
+        var address=String(req.body.SenderAddress);
+        var agentAddress=String(req.body.AgentAddress);
+        var senderPrivateKey=String(req.body.privateKey);
         var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
@@ -259,30 +266,22 @@ router.post('/addAgent/:address/:privateKey',function (req,res) {
     }
 );
 router.get('/GetLandsFromCache',function (req,res) {
-   /* request.get('http://54.76.154.101',
-        function (error,response,body) {
-            if(error)
-            {
-                throw error;
+    getLogsFromCache().then(function(LogResult){
+        var convertedLands=[];
+        Lands.find({},function (err,DBResult) {
+            if(err){
+                res.send(err);
             }
-            else {
-                res.json(JSON.parse(body));
-            }
-        })
-
-    Lands.find({},function (err,result) {
-        if(err){
-            res.send(err);
-        }
-        if(!result){
-            res.status(404).send();
-
-        }else{
-            res.json(result);
-        }});
-*/
-    getLogsFromCache().then(function(result){
-        res.json(result);
+            else{
+                LogResult.forEach(function (object) {
+                var x   =   DBResult.find(function (element) {
+                      return  element._id==object.id;
+                   });
+                if(x != undefined)
+                convertedLands.push(x);
+                });
+                res.json(convertedLands);
+            }});
     }).catch(function(error){
         res.send(error);
     })
@@ -290,7 +289,7 @@ router.get('/GetLandsFromCache',function (req,res) {
 
 function getLogsFromCache(){
     return new Promise(function(resolve,reject){
-        request('http://54.76.154.101',
+        request('http://54.76.154.101:3000',
             function (error,response,body) {
                 if(error)
                 {
@@ -303,24 +302,182 @@ function getLogsFromCache(){
     })
 }
 
+router.post('/add', (req, res) => {
+    console.log("hiii");
 
-router.get('/', function (req, res) {
-    Lands.find({}, function (err, data) {
+
+    var land;
+    try {
+        land = JSON.parse(req.body.land);
+    } catch (e) {
+        res.status(500).send();
+    }
+
+    var pinsHash = sha256(JSON.stringify(land.pins));
+
+    Lands.find({
+        owner: land.owner,
+
+    }, function (err, result) {
         if (err)
-            res.status(500).send();
+            res.status(500).send(err);
         else {
-            res.json(data);
+
+            var notExists = result.every((element) => {
+                var myPins = sha256(JSON.stringify(utils.pickFromArray(element.pins, 'longitude', 'latitude')));
+
+
+                /*if (myPins === pinsHash) {
+                    exists = true;
+                    console.log('exists true');
+                    res.status(201).json({
+                        code: 1,
+                        message: 'Land already exists'
+                    });
+
+
+                }*/
+
+                var a = result.filter((x) => {
+
+                    var myPins = sha256(JSON.stringify(utils.pickFromArray(x.pins, 'longitude', 'latitude')));
+
+                    return myPins === pinsHash;
+                });
+
+                if (a.length > 0) {
+                    res.status(201).json({
+                        code: 1,
+                        message: 'Land already exists'
+                    });
+                    return false;
+                }
+
+
+            });
+
+
+            console.log("exist");
+
+            if (notExists) {
+
+                if (!req.files.documents) {
+                    res.status(201).json({
+                        code: 1,
+                        message: 'Documents are required'
+                    });
+                }
+                else {
+
+                    var files = [];
+
+
+                    console.log('start upload');
+
+                    var landPath = path.join(__dirname, '..', 'public', 'docs', pinsHash);
+                    if (!fs.existsSync(landPath)) {
+                        fs.mkdirSync(landPath);
+
+
+                    }
+
+
+                    if (isNaN(req.files.documents.length)) {
+                        console.log('single file');
+                        files.push(req.files.documents);
+                        //if it's single file
+                        req.files.documents.mv(path.join(landPath, req.files.documents.name), (err) => {
+                            if (err) {
+                                console.log(err);
+                                res.status(500).send();
+
+                            }
+                            else {
+                                files.push(req.files.documents);
+                            }
+
+
+                        });
+                    }
+                    else {
+                        console.log('too many files');
+                        files = req.files.documents;
+                        //if it's an array
+                        async.forEachOf(req.files.documents, (element) => {
+
+                            element.mv(path.join(landPath, element.name), (err) => {
+                                if (err) {
+
+
+                                    res.status(500).send();
+
+                                }
+                                else {
+                                    console.log('no error during upload');
+                                    files.push(element);
+                                }
+
+
+                            });
+                        });
+
+
+                    }
+
+
+                    console.log(files.length);
+
+
+                    var l = new Lands(land);
+                    l.documents = [];
+
+                    var hashes = '';
+                    async.forEachOf(files, (file) => {
+
+                        var readStream = fs.createReadStream(path.join(landPath, file.name));
+                        var chunks = '';
+                        readStream.on('data', function (chunk) {
+
+
+                            chunks += chunk;
+                        })
+
+                            .on('end', function () {
+
+                                console.log(sha256(chunks));
+                                hashes +=chunks;
+                                l.documents.push({
+                                    name:file.name,
+                                    hash:sha256(chunks)
+
+                                })
+                            })
+                    });
+
+
+
+
+                    l.save((err, data) => {
+                        if (err)
+                            res.status(500).send();
+                        console.log('added to database');
+                        res.json(data);
+                    })
+                }
+
+
+            }
+
         }
-    })
+
+    });
+
 });
-router.post('/add', function (req, res) {
-    var new_land = new Lands(req.body);
-    new_land.save(function (err, data) {
-        if (err)
-            res.send(err);
-        res.json(data);
-    })
-});
+
+
+
+
+
 
 
 module.exports = router;
