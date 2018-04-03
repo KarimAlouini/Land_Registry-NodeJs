@@ -271,6 +271,27 @@ router.post('/addAgent',function (req,res) {
 
     }
 );
+
+router.get('/AllTransaction',function (req,res) {
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+    var DataPassContract = web3.eth.contract(abi);
+    var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+    var Event = dataPass.LogReturn({}, {fromBlock: 90, toBlock: 'latest'});
+
+
+    Event.get(function (err,logs) {
+        if(!err){
+            var transactions=[];
+            for (i = logs.length-5; i < logs.length; i++) {
+                transactions.push( new Date(Date.now()-(web3.eth.getBlock(2955825).timestamp)));
+            };
+            res.json(transactions);
+        }
+        else {
+            throw  err
+        }
+    });
+});
 router.get('/GetLandsFromCache',function (req,res) {
     getLogsFromCache().then(function(LogResult){
         var convertedLands=[];
