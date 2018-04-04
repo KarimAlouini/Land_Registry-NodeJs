@@ -22,11 +22,8 @@
     "mongodb": "^3.0.3",
     "mongoose": "^5.0.6",
     "morgan": "~1.9.0",
-<<<<<<< HEAD
     "nodemon": "^1.17.3",
     "passport": "^0.4.0",
-=======
->>>>>>> master
     "request": "^2.85.0",
     "passport": "^0.4.0",
     "serve-favicon": "~2.4.5",

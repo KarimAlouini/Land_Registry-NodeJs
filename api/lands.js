@@ -530,10 +530,14 @@ router.get('/users/:address',function (req,res) {
         if(err){
             res.send(err);
         }
-        if(!result){
-            res.status(404).send();
+        if(result){
+            res.json(result);
+        }
 
-router.get('/getLandByID',function (req,res) {
+        });
+});
+router.get('/getLandByID/:id',function (req,res) {
+    var id = req.params.id;
     Lands.find({'_id' : id },function (err,result) {
         if (err){
             res.send(err);
@@ -541,18 +545,9 @@ router.get('/getLandByID',function (req,res) {
             res.json(result[0]);
         }
 
-        }
-        if(!result){
-            res.status(404).send();
-        }else{
-            res.json(result);
-        }
-    });
-});
-
     })
 
-})
+});
 
 
 
