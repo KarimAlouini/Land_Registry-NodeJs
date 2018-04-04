@@ -3,6 +3,7 @@ var router = express.Router();
 var Lands = require('../models/Land.model');
 const request= require('request')
 var Web3 = require('web3');
+var jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
 var privateKey = new Buffer('922bd7a49e2496bf1c3c9b27e71eb1439988f80bf5854034be3d0eabd753660b', 'hex');
 const Tx = require('ethereumjs-tx');
@@ -213,19 +214,24 @@ router.get('/transactionStatus/:hash', function (req, res) {
     })
 });
 
-router.get('/accessCheck/:address',function (req,res) {
+router.get('/accessCheck/:address',verifyToken,function (req,res) {
     var address=String(req.params.address);
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    dataPass.accessCheck.call(address,function(err, result) {
-        if(err) {
-            res.send('a problem');
-        } else {
-            res.send(result);
+    jwt.verify(req.token,'quadraSecretKey',function (err,authData) {
+        if(err){
+            res.sendStatus(403);
+        }else{
+            dataPass.accessCheck.call(address,function(err, result) {
+                if(err) {
+                    res.send('a problem');
+                } else {
+                    res.json({"result":result,'authData':authData})
+                }
+            });
         }
     });
-
 
 });
 router.post('/addAgent',function (req,res) {
@@ -265,6 +271,27 @@ router.post('/addAgent',function (req,res) {
 
     }
 );
+
+router.get('/AllTransaction',function (req,res) {
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+    var DataPassContract = web3.eth.contract(abi);
+    var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+    var Event = dataPass.LogReturn({}, {fromBlock: 90, toBlock: 'latest'});
+
+
+    Event.get(function (err,logs) {
+        if(!err){
+            var transactions=[];
+            for (i = logs.length-5; i < logs.length; i++) {
+                transactions.push( new Date(Date.now()-(web3.eth.getBlock(2955825).timestamp)));
+            };
+            res.json(transactions);
+        }
+        else {
+            throw  err
+        }
+    });
+});
 router.get('/GetLandsFromCache',function (req,res) {
     getLogsFromCache().then(function(LogResult){
         var convertedLands=[];
@@ -473,7 +500,28 @@ router.post('/add', (req, res) => {
     });
 
 });
+router.post('/generatToken',function (req,res) {
+    jwt.sign(req.body,'quadraSecretKey',{expiresIn:'1h'},function (err,token) {
+        if(!err)
+            res.json({'token':token});
+    })
+});
 
+function verifyToken(req,res,next) {
+    const bearerHeader = req.headers['authorization'];
+    if(typeof  bearerHeader !== 'undefined')
+    {
+        const bearer = bearerHeader.split(' ');
+        const token = bearer[1];
+        req.token = token;
+        next();
+    }else {
+        res.sendStatus(403);
+    }
+
+
+
+}
 
 
 
