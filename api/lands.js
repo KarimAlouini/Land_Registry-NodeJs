@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Lands = require('../models/Land.model');
+var User = require('../models/User.model');
 const request= require('request')
 var Web3 = require('web3');
 var jwt = require('jsonwebtoken');
@@ -522,7 +523,21 @@ function verifyToken(req,res,next) {
 
 
 }
+router.get('/users/:address',function (req,res) {
+    var address = req.params.address;
+    User.find({'blockchainAddress' : address},function (err,result) {
+        if(err){
+            res.send(err);
+        }
+        if(!result){
+            res.status(404).send();
 
+        }else{
+            res.json(result[0]);
+        }
+
+    });
+});
 
 
 
