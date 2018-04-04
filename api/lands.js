@@ -330,6 +330,7 @@ function getLogsFromCache(){
     })
 }
 
+
 router.post('/add', (req, res) => {
     console.log("hiii");
 
@@ -532,12 +533,29 @@ router.get('/users/:address',function (req,res) {
         if(!result){
             res.status(404).send();
 
+router.get('/getLandByID',function (req,res) {
+    Lands.find({'_id' : id },function (err,result) {
+        if (err){
+            res.send(err);
         }else{
             res.json(result[0]);
         }
 
+        }
+        if(!result){
+            res.status(404).send();
+        }else{
+            res.json(result);
+        }
     });
 });
+
+    })
+
+})
+
+
+
 
 
 
