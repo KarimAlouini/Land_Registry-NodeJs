@@ -329,6 +329,7 @@ function getLogsFromCache(){
     })
 }
 
+
 router.post('/add', (req, res) => {
     console.log("hiii");
 
@@ -522,6 +523,23 @@ function verifyToken(req,res,next) {
 
 
 }
+
+router.get('/getLandByID',function (req,res) {
+    Lands.find({'_id' : id },function (err,result) {
+        if (err){
+            res.send(err);
+
+        }
+        if(!result){
+            res.status(404).send();
+        }else{
+            res.json(result);
+        }
+
+    })
+
+})
+
 
 
 
