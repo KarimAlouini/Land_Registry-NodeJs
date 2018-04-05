@@ -30,6 +30,10 @@ var landSchema = new Schema({
         number: Number,
         zipCode: Number
     },
+    dividable:{
+        type:Boolean,
+        default:false
+    },
     documents: [{
 
         name: String,

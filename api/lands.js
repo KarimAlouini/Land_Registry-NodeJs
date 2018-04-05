@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Lands = require('../models/Land.model');
-const request= require('request')
+const request = require('request')
 var Web3 = require('web3');
 var bodyParser = require('body-parser');
 var privateKey = new Buffer('922bd7a49e2496bf1c3c9b27e71eb1439988f80bf5854034be3d0eabd753660b', 'hex');
@@ -17,7 +17,7 @@ var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto-js');
 
-var abi =[
+var abi = [
     {
         "constant": false,
         "inputs": [
@@ -156,7 +156,7 @@ var abi =[
     }
 ];
 
-router.post('/addLand',function (req,res) {
+router.post('/addLand', function (req, res) {
 
         console.log('addLand');
         var address = String(req.body.address);
@@ -169,8 +169,8 @@ router.post('/addLand',function (req,res) {
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
-        var contactFunction = dataPass.add.getData(String(address),idland,hashedInfos,hashDocs);
-        var number = web3.eth.getTransactionCount(address,"pending");
+        var contactFunction = dataPass.add.getData(String(address), idland, hashedInfos, hashDocs);
+        var number = web3.eth.getTransactionCount(address, "pending");
         console.log(web3.version);
         var rawTx = {
             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
@@ -187,8 +187,8 @@ router.post('/addLand',function (req,res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
-        web3.eth.sendRawTransaction(raw,function (err,data) {
-            if(!err)
+        web3.eth.sendRawTransaction(raw, function (err, data) {
+            if (!err)
 
                 res.send(data);
             else
@@ -199,27 +199,25 @@ router.post('/addLand',function (req,res) {
 );
 
 
-
-
 router.get('/transactionStatus/:hash', function (req, res) {
     var hash = req.params.hash;
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
 
-    web3.eth.getTransactionReceipt(hash,function (err,data) {
-        if(!err)
+    web3.eth.getTransactionReceipt(hash, function (err, data) {
+        if (!err)
             res.send(data);
         else
             res.send(err);
     })
 });
 
-router.get('/accessCheck/:address',function (req,res) {
-    var address=String(req.params.address);
+router.get('/accessCheck/:address', function (req, res) {
+    var address = String(req.params.address);
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    dataPass.accessCheck.call(address,function(err, result) {
-        if(err) {
+    dataPass.accessCheck.call(address, function (err, result) {
+        if (err) {
             res.send('a problem');
         } else {
             res.send(result);
@@ -228,23 +226,23 @@ router.get('/accessCheck/:address',function (req,res) {
 
 
 });
-router.post('/addAgent',function (req,res) {
+router.post('/addAgent', function (req, res) {
 
-        var address=String(req.body.SenderAddress);
-        var agentAddress=String(req.body.AgentAddress);
-        var senderPrivateKey=String(req.body.privateKey);
+        var address = String(req.body.SenderAddress);
+        var agentAddress = String(req.body.AgentAddress);
+        var senderPrivateKey = String(req.body.privateKey);
         var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
         var contactFunction = dataPass.addAgent.getData(agentAddress);
-        var number = web3.eth.getTransactionCount(address,"pending");
+        var number = web3.eth.getTransactionCount(address, "pending");
         console.log(web3.version);
         var rawTx = {
             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
-            gasPrice: web3.toHex(web3.toWei('1000','gwei')),
+            gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
             gasLimit: web3.toHex(3000000),
-            from : address,
+            from: address,
             to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
             value: '0x00',
             data: String(contactFunction)
@@ -255,8 +253,8 @@ router.post('/addAgent',function (req,res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
-        web3.eth.sendRawTransaction(raw,function (err,data) {
-            if(!err)
+        web3.eth.sendRawTransaction(raw, function (err, data) {
+            if (!err)
 
                 res.send(data);
             else
@@ -265,34 +263,34 @@ router.post('/addAgent',function (req,res) {
 
     }
 );
-router.get('/GetLandsFromCache',function (req,res) {
-    getLogsFromCache().then(function(LogResult){
-        var convertedLands=[];
-        Lands.find({},function (err,DBResult) {
-            if(err){
+router.get('/GetLandsFromCache', function (req, res) {
+    getLogsFromCache().then(function (LogResult) {
+        var convertedLands = [];
+        Lands.find({}, function (err, DBResult) {
+            if (err) {
                 res.send(err);
             }
-            else{
+            else {
                 LogResult.forEach(function (object) {
-                var x   =   DBResult.find(function (element) {
-                      return  element._id==object.id;
-                   });
-                if(x != undefined)
-                convertedLands.push(x);
+                    var x = DBResult.find(function (element) {
+                        return element._id == object.id;
+                    });
+                    if (x != undefined)
+                        convertedLands.push(x);
                 });
                 res.json(convertedLands);
-            }});
-    }).catch(function(error){
+            }
+        });
+    }).catch(function (error) {
         res.send(error);
     })
 });
 
-function getLogsFromCache(){
-    return new Promise(function(resolve,reject){
+function getLogsFromCache() {
+    return new Promise(function (resolve, reject) {
         request('http://54.76.154.101:3000',
-            function (error,response,body) {
-                if(error)
-                {
+            function (error, response, body) {
+                if (error) {
                     reject(" problem ");
                 }
                 else {
@@ -303,14 +301,23 @@ function getLogsFromCache(){
 }
 
 router.post('/add', (req, res) => {
-    console.log("hiii");
+    console.log("start");
 
+    var docs = [];
+    console.log('here');
+
+
+for(key in req.files){
+    docs.push(req.files[key]);
+}
+
+    console.log(docs.length);
 
     var land;
     try {
         land = JSON.parse(req.body.land);
     } catch (e) {
-        res.status(500).send();
+        res.status(500).send("wrong Json");
     }
 
     var pinsHash = sha256(JSON.stringify(land.pins));
@@ -326,18 +333,6 @@ router.post('/add', (req, res) => {
             var notExists = result.every((element) => {
                 var myPins = sha256(JSON.stringify(utils.pickFromArray(element.pins, 'longitude', 'latitude')));
 
-
-                /*if (myPins === pinsHash) {
-                    exists = true;
-                    console.log('exists true');
-                    res.status(201).json({
-                        code: 1,
-                        message: 'Land already exists'
-                    });
-
-
-                }*/
-
                 var a = result.filter((x) => {
 
                     var myPins = sha256(JSON.stringify(utils.pickFromArray(x.pins, 'longitude', 'latitude')));
@@ -352,6 +347,7 @@ router.post('/add', (req, res) => {
                     });
                     return false;
                 }
+                return true;
 
 
             });
@@ -361,7 +357,7 @@ router.post('/add', (req, res) => {
 
             if (notExists) {
 
-                if (!req.files.documents) {
+                if (!docs) {
                     res.status(201).json({
                         code: 1,
                         message: 'Documents are required'
@@ -382,18 +378,18 @@ router.post('/add', (req, res) => {
                     }
 
 
-                    if (isNaN(req.files.documents.length)) {
+                    if (isNaN(docs.length)) {
                         console.log('single file');
-                        files.push(req.files.documents);
+                        files.push(docs);
                         //if it's single file
-                        req.files.documents.mv(path.join(landPath, req.files.documents.name), (err) => {
+                        docs.mv(path.join(landPath, docs.name), (err) => {
                             if (err) {
                                 console.log(err);
-                                res.status(500).send();
+                                res.status(500).send("single file");
 
                             }
                             else {
-                                files.push(req.files.documents);
+                                files.push(docs);
                             }
 
 
@@ -401,15 +397,15 @@ router.post('/add', (req, res) => {
                     }
                     else {
                         console.log('too many files');
-                        files = req.files.documents;
+                        files = docs;
                         //if it's an array
-                        async.forEachOf(req.files.documents, (element) => {
+                        async.forEachOf(docs, (element) => {
 
                             element.mv(path.join(landPath, element.name), (err) => {
                                 if (err) {
 
 
-                                    res.status(500).send();
+                                    res.status(500).send("too many files");
 
                                 }
                                 else {
@@ -445,21 +441,17 @@ router.post('/add', (req, res) => {
                             .on('end', function () {
 
                                 console.log(sha256(chunks));
-                                hashes +=chunks;
+                                hashes += chunks;
                                 l.documents.push({
-                                    name:file.name,
-                                    hash:sha256(chunks)
+                                    name: file.name,
+                                    hash: sha256(chunks)
 
                                 })
                             })
                     });
-
-
-
-
                     l.save((err, data) => {
                         if (err)
-                            res.status(500).send();
+                            res.status(500).send("data base error");
                         console.log('added to database');
                         res.json(data);
                     })
@@ -473,11 +465,6 @@ router.post('/add', (req, res) => {
     });
 
 });
-
-
-
-
-
 
 
 module.exports = router;

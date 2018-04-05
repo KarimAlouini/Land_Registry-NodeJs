@@ -1,3 +1,4 @@
+/*
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
 
@@ -15,6 +16,5 @@ var mongoose = require('mongoose'),
             }
 
 
-    })
-;
-module.exports = mongoose.model('Document', documentSchema);
+    });
+module.exports = mongoose.model('Document', documentSchema);*/
