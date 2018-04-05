@@ -18,6 +18,7 @@ var utils = require('../utils/utils');
 var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto-js');
+var Document = require('../models/Document.schema');
 
 var abi =[
     {
@@ -442,6 +443,7 @@ for(key in req.files){
                                 else {
                                     console.log('no error during upload');
                                     files.push(element);
+
                                 }
 
 
@@ -473,11 +475,18 @@ for(key in req.files){
 
                                 console.log(sha256(chunks));
                                 hashes += chunks;
-                                l.documents.push({
+
+                                var d = new Document({
                                     name: file.name,
                                     hash: sha256(chunks)
 
-                                })
+                                });
+
+                                d.save((err,dRes)=>{
+                                    console.log(err);
+                                    console.log(dRes);
+                                });
+
                             })
                     });
 

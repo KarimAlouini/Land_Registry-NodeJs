@@ -1,6 +1,6 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-    documentSchema = require('./Document.schema'),
+
     _ = require('underscore');
 
 
@@ -34,17 +34,7 @@ var landSchema = new Schema({
         type:Boolean,
         default:false
     },
-    documents: [{
 
-        name: String,
-        hash: String,
-        dateAdded:
-            {
-                type: Date,
-                default:
-                Date.now
-            }
-    }],
     pins: [{
         longitude: {
             type: Number,

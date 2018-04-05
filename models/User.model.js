@@ -40,7 +40,6 @@ var mongoose = require('mongoose'),
         required:true,
         trim:true
     },
-    documents:documentSchema,
      role:{
         type:String,
          default:'User',
