@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Lands = require('../models/Land.model');
+var User = require('../models/User.model');
 const request= require('request')
 var Web3 = require('web3');
 var jwt = require('jsonwebtoken');
@@ -233,6 +234,7 @@ router.get('/accessCheck/:address',verifyToken,function (req,res) {
         }
     });
 
+
 });
 router.post('/addAgent',function (req,res) {
 
@@ -329,16 +331,24 @@ function getLogsFromCache(){
     })
 }
 
-
 router.post('/add', (req, res) => {
-    console.log("hiii");
+    console.log("start");
 
+    var docs = [];
+    console.log('here');
+
+
+for(key in req.files){
+    docs.push(req.files[key]);
+}
+
+    console.log(docs.length);
 
     var land;
     try {
         land = JSON.parse(req.body.land);
     } catch (e) {
-        res.status(500).send();
+        res.status(500).send("wrong Json");
     }
 
     var pinsHash = sha256(JSON.stringify(land.pins));
@@ -354,18 +364,6 @@ router.post('/add', (req, res) => {
             var notExists = result.every((element) => {
                 var myPins = sha256(JSON.stringify(utils.pickFromArray(element.pins, 'longitude', 'latitude')));
 
-
-                /*if (myPins === pinsHash) {
-                    exists = true;
-                    console.log('exists true');
-                    res.status(201).json({
-                        code: 1,
-                        message: 'Land already exists'
-                    });
-
-
-                }*/
-
                 var a = result.filter((x) => {
 
                     var myPins = sha256(JSON.stringify(utils.pickFromArray(x.pins, 'longitude', 'latitude')));
@@ -380,6 +378,7 @@ router.post('/add', (req, res) => {
                     });
                     return false;
                 }
+                return true;
 
 
             });
@@ -389,7 +388,7 @@ router.post('/add', (req, res) => {
 
             if (notExists) {
 
-                if (!req.files.documents) {
+                if (!docs) {
                     res.status(201).json({
                         code: 1,
                         message: 'Documents are required'
@@ -410,18 +409,18 @@ router.post('/add', (req, res) => {
                     }
 
 
-                    if (isNaN(req.files.documents.length)) {
+                    if (isNaN(docs.length)) {
                         console.log('single file');
-                        files.push(req.files.documents);
+                        files.push(docs);
                         //if it's single file
-                        req.files.documents.mv(path.join(landPath, req.files.documents.name), (err) => {
+                        docs.mv(path.join(landPath, docs.name), (err) => {
                             if (err) {
                                 console.log(err);
-                                res.status(500).send();
+                                res.status(500).send("single file");
 
                             }
                             else {
-                                files.push(req.files.documents);
+                                files.push(docs);
                             }
 
 
@@ -429,15 +428,15 @@ router.post('/add', (req, res) => {
                     }
                     else {
                         console.log('too many files');
-                        files = req.files.documents;
+                        files = docs;
                         //if it's an array
-                        async.forEachOf(req.files.documents, (element) => {
+                        async.forEachOf(docs, (element) => {
 
                             element.mv(path.join(landPath, element.name), (err) => {
                                 if (err) {
 
 
-                                    res.status(500).send();
+                                    res.status(500).send("too many files");
 
                                 }
                                 else {
@@ -473,10 +472,10 @@ router.post('/add', (req, res) => {
                             .on('end', function () {
 
                                 console.log(sha256(chunks));
-                                hashes +=chunks;
+                                hashes += chunks;
                                 l.documents.push({
-                                    name:file.name,
-                                    hash:sha256(chunks)
+                                    name: file.name,
+                                    hash: sha256(chunks)
 
                                 })
                             })
@@ -487,7 +486,7 @@ router.post('/add', (req, res) => {
 
                     l.save((err, data) => {
                         if (err)
-                            res.status(500).send();
+                            res.status(500).send("data base error");
                         console.log('added to database');
                         res.json(data);
                     })
@@ -523,26 +522,30 @@ function verifyToken(req,res,next) {
 
 
 }
-
-router.get('/getLandByID/:id',function (req,res) {
-    Lands.find({'_id' : req.params.id},function (err,result) {
-        if (err){
-            res.status(403).send(err);
-
+router.get('/users/:address',function (req,res) {
+    var address = req.params.address;
+    User.find({'blockchainAddress' : address},function (err,result) {
+        if(err){
+            res.send(err);
         }
-        if(!result){
-            res.status(404).send();
-        }else{
+        if(result){
             res.json(result);
+        }
+
+        });
+});
+router.get('/getLandByID/:id',function (req,res) {
+    var id = req.params.id;
+    Lands.find({'_id' : id },function (err,result) {
+        if (err){
+            res.send(err);
+        }else{
+            res.json(result[0]);
         }
 
     })
 
-})
-
-
-
-
+});
 
 
 
