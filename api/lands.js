@@ -286,7 +286,7 @@ router.get('/AllTransaction',function (req,res) {
         if(!err){
             var transactions=[];
             for (i = logs.length-3; i < logs.length; i++) {
-                transactions.push({"time":web3.eth.getBlock(logs[i].blockNumber).timestamp,"blockHash":logs[i].blockHash});
+                transactions.push({"time":web3.eth.getBlock(logs[i].blockNumber).timestamp,"blockHash":logs[i].transactionHash});
             };
             res.json(transactions);
         }
