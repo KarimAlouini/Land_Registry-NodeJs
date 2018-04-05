@@ -524,10 +524,10 @@ function verifyToken(req,res,next) {
 
 }
 
-router.get('/getLandByID',function (req,res) {
-    Lands.find({'_id' : id },function (err,result) {
+router.get('/getLandByID/:id',function (req,res) {
+    Lands.find({'_id' : req.params.id},function (err,result) {
         if (err){
-            res.send(err);
+            res.status(403).send(err);
 
         }
         if(!result){
