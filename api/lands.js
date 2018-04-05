@@ -221,14 +221,14 @@ router.get('/accessCheck/:address',verifyToken,function (req,res) {
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
     jwt.verify(req.token,'quadraSecretKey',function (err,authData) {
-        if(err){
+        if(err || (authData.role != "admin")){
             res.sendStatus(403);
         }else{
             dataPass.accessCheck.call(address,function(err, result) {
                 if(err) {
                     res.send('a problem');
                 } else {
-                    res.json({"result":result,'authData':authData})
+                    res.json({"result":result})
                 }
             });
         }
@@ -277,14 +277,14 @@ router.get('/AllTransaction',function (req,res) {
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    var Event = dataPass.LogReturn({}, {fromBlock: 90, toBlock: 'latest'});
+    var Event = dataPass.LogReturn({}, {fromBlock: 0, toBlock: 'latest'});
 
 
     Event.get(function (err,logs) {
         if(!err){
             var transactions=[];
-            for (i = logs.length-5; i < logs.length; i++) {
-                transactions.push( new Date(Date.now()-(web3.eth.getBlock(2955825).timestamp)));
+            for (i = logs.length-3; i < logs.length; i++) {
+                transactions.push({"time":web3.eth.getBlock(logs[i].blockNumber).timestamp,"blockHash":logs[i].blockHash});
             };
             res.json(transactions);
         }
@@ -549,6 +549,23 @@ router.get('/getLandByID/:id',function (req,res) {
 
 });
 
+router.post('/AgentLogin',function (req,res) {
+    var login = req.body.login;
+    var pwd = req.body.pwd;
+    User.find({'login' : login, 'password':pwd},function (err,result) {
+        if(err){
+            res.send(err);
+        }
+        if(result){
+            if(result.length==0)
+            {
+            res.status(404);
+            }
+            res.json(result[0]);
+        }
+
+    });
+});
 
 
 
