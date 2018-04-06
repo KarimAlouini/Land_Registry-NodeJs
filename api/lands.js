@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var Lands = require('../models/Land.model');
 var User = require('../models/User.model');
-const request= require('request')
+const request = require('request')
 var Web3 = require('web3');
 var jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
@@ -19,7 +19,7 @@ var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto-js');
 
-var abi =[
+var abi = [
     {
         "constant": false,
         "inputs": [
@@ -158,7 +158,7 @@ var abi =[
     }
 ];
 
-router.post('/addLand',function (req,res) {
+router.post('/addLand', function (req, res) {
 
         console.log('addLand');
         var address = String(req.body.address);
@@ -171,8 +171,8 @@ router.post('/addLand',function (req,res) {
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
-        var contactFunction = dataPass.add.getData(String(address),idland,hashedInfos,hashDocs);
-        var number = web3.eth.getTransactionCount(address,"pending");
+        var contactFunction = dataPass.add.getData(String(address), idland, hashedInfos, hashDocs);
+        var number = web3.eth.getTransactionCount(address, "pending");
         console.log(web3.version);
         var rawTx = {
             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
@@ -189,8 +189,8 @@ router.post('/addLand',function (req,res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
-        web3.eth.sendRawTransaction(raw,function (err,data) {
-            if(!err)
+        web3.eth.sendRawTransaction(raw, function (err, data) {
+            if (!err)
 
                 res.send(data);
             else
@@ -201,34 +201,32 @@ router.post('/addLand',function (req,res) {
 );
 
 
-
-
 router.get('/transactionStatus/:hash', function (req, res) {
     var hash = req.params.hash;
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
 
-    web3.eth.getTransactionReceipt(hash,function (err,data) {
-        if(!err)
+    web3.eth.getTransactionReceipt(hash, function (err, data) {
+        if (!err)
             res.send(data);
         else
             res.send(err);
     })
 });
 
-router.get('/accessCheck/:address',verifyToken,function (req,res) {
-    var address=String(req.params.address);
+router.get('/accessCheck/:address', verifyToken, function (req, res) {
+    var address = String(req.params.address);
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    jwt.verify(req.token,'quadraSecretKey',function (err,authData) {
-        if(err){
+    jwt.verify(req.token, 'quadraSecretKey', function (err, authData) {
+        if (err) {
             res.sendStatus(403);
-        }else{
-            dataPass.accessCheck.call(address,function(err, result) {
-                if(err) {
+        } else {
+            dataPass.accessCheck.call(address, function (err, result) {
+                if (err) {
                     res.send('a problem');
                 } else {
-                    res.json({"result":result,'authData':authData})
+                    res.json({"result": result, 'authData': authData})
                 }
             });
         }
@@ -236,23 +234,23 @@ router.get('/accessCheck/:address',verifyToken,function (req,res) {
 
 
 });
-router.post('/addAgent',function (req,res) {
+router.post('/addAgent', function (req, res) {
 
-        var address=String(req.body.SenderAddress);
-        var agentAddress=String(req.body.AgentAddress);
-        var senderPrivateKey=String(req.body.privateKey);
+        var address = String(req.body.SenderAddress);
+        var agentAddress = String(req.body.AgentAddress);
+        var senderPrivateKey = String(req.body.privateKey);
         var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
         var contactFunction = dataPass.addAgent.getData(agentAddress);
-        var number = web3.eth.getTransactionCount(address,"pending");
+        var number = web3.eth.getTransactionCount(address, "pending");
         console.log(web3.version);
         var rawTx = {
             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
-            gasPrice: web3.toHex(web3.toWei('1000','gwei')),
+            gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
             gasLimit: web3.toHex(3000000),
-            from : address,
+            from: address,
             to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
             value: '0x00',
             data: String(contactFunction)
@@ -263,8 +261,8 @@ router.post('/addAgent',function (req,res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
-        web3.eth.sendRawTransaction(raw,function (err,data) {
-            if(!err)
+        web3.eth.sendRawTransaction(raw, function (err, data) {
+            if (!err)
 
                 res.send(data);
             else
@@ -274,19 +272,20 @@ router.post('/addAgent',function (req,res) {
     }
 );
 
-router.get('/AllTransaction',function (req,res) {
+router.get('/AllTransaction', function (req, res) {
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
     var Event = dataPass.LogReturn({}, {fromBlock: 90, toBlock: 'latest'});
 
 
-    Event.get(function (err,logs) {
-        if(!err){
-            var transactions=[];
-            for (i = logs.length-5; i < logs.length; i++) {
-                transactions.push( new Date(Date.now()-(web3.eth.getBlock(2955825).timestamp)));
-            };
+    Event.get(function (err, logs) {
+        if (!err) {
+            var transactions = [];
+            for (i = logs.length - 5; i < logs.length; i++) {
+                transactions.push(new Date(Date.now() - (web3.eth.getBlock(2955825).timestamp)));
+            }
+            ;
             res.json(transactions);
         }
         else {
@@ -294,34 +293,34 @@ router.get('/AllTransaction',function (req,res) {
         }
     });
 });
-router.get('/GetLandsFromCache',function (req,res) {
-    getLogsFromCache().then(function(LogResult){
-        var convertedLands=[];
-        Lands.find({},function (err,DBResult) {
-            if(err){
+router.get('/GetLandsFromCache', function (req, res) {
+    getLogsFromCache().then(function (LogResult) {
+        var convertedLands = [];
+        Lands.find({}, function (err, DBResult) {
+            if (err) {
                 res.send(err);
             }
-            else{
+            else {
                 LogResult.forEach(function (object) {
-                var x   =   DBResult.find(function (element) {
-                      return  element._id==object.id;
-                   });
-                if(x != undefined)
-                convertedLands.push(x);
+                    var x = DBResult.find(function (element) {
+                        return element._id == object.id;
+                    });
+                    if (x != undefined)
+                        convertedLands.push(x);
                 });
                 res.json(convertedLands);
-            }});
-    }).catch(function(error){
+            }
+        });
+    }).catch(function (error) {
         res.send(error);
     })
 });
 
-function getLogsFromCache(){
-    return new Promise(function(resolve,reject){
+function getLogsFromCache() {
+    return new Promise(function (resolve, reject) {
         request('http://54.76.154.101:3000',
-            function (error,response,body) {
-                if(error)
-                {
+            function (error, response, body) {
+                if (error) {
                     reject(" problem ");
                 }
                 else {
@@ -331,6 +330,52 @@ function getLogsFromCache(){
     })
 }
 
+router.post('/divide/:id', (req, res) => {
+    Lands.findById(req.params.id, function (err, result) {
+        if (err) {
+            res.send(err);
+        } else {
+
+            var land = result;
+            console.log(land.dividable);
+            if (land.dividable === 'false') {
+
+                res.status(400).send();
+            }
+
+            else {
+                land.documents = [];
+                var childrenIds = [];
+                async.forEachOf(req.body.children, (child) => {
+
+                    var l = new Lands({
+                        owner: land.owner,
+                        pins: child.pins,
+                        parent: land._id
+                    });
+
+                    l.save((err, result) => {
+
+
+                        console.log(`children length ${childrenIds.length}`);
+                        console.log(`body children length ${req.body.children.length}`);
+                        childrenIds.push(result._id);
+
+                        if (childrenIds.length === req.body.children.length) {
+                            console.log('equals');
+                            res.send('ok');
+                        }
+                    });
+
+                });
+            }
+
+
+        }
+
+    });
+
+});
 router.post('/add', (req, res) => {
     console.log("start");
 
@@ -338,9 +383,9 @@ router.post('/add', (req, res) => {
     console.log('here');
 
 
-for(key in req.files){
-    docs.push(req.files[key]);
-}
+    for (key in req.files) {
+        docs.push(req.files[key]);
+    }
 
     console.log(docs.length);
 
@@ -482,8 +527,6 @@ for(key in req.files){
                     });
 
 
-
-
                     l.save((err, data) => {
                         if (err)
                             res.status(500).send("data base error");
@@ -500,53 +543,74 @@ for(key in req.files){
     });
 
 });
-router.post('/generatToken',function (req,res) {
-    jwt.sign(req.body,'quadraSecretKey',{expiresIn:'1h'},function (err,token) {
-        if(!err)
-            res.json({'token':token});
+router.post('/generatToken', function (req, res) {
+    jwt.sign(req.body, 'quadraSecretKey', {expiresIn: '1h'}, function (err, token) {
+        if (!err)
+            res.json({'token': token});
     })
 });
 
-function verifyToken(req,res,next) {
+function verifyToken(req, res, next) {
     const bearerHeader = req.headers['authorization'];
-    if(typeof  bearerHeader !== 'undefined')
-    {
+    if (typeof  bearerHeader !== 'undefined') {
         const bearer = bearerHeader.split(' ');
         const token = bearer[1];
         req.token = token;
         next();
-    }else {
+    } else {
         res.sendStatus(403);
     }
 
 
-
 }
-router.get('/users/:address',function (req,res) {
+
+router.get('/users/:address', function (req, res) {
     var address = req.params.address;
-    User.find({'blockchainAddress' : address},function (err,result) {
-        if(err){
+    User.find({'blockchainAddress': address}, function (err, result) {
+        if (err) {
             res.send(err);
         }
-        if(result){
+        if (result) {
             res.json(result);
         }
 
-        });
+    });
 });
-router.get('/getLandByID/:id',function (req,res) {
+router.get('/getLandByID/:id', function (req, res) {
     var id = req.params.id;
-    Lands.find({'_id' : id },function (err,result) {
-        if (err){
+    Lands.findById(id, function (err, result) {
+
+        if (err) {
             res.send(err);
-        }else{
-            res.json(result[0]);
+        } else {
+
+
+
+
+            var children = [];
+
+                Lands.find({parent: result._id}, (err, result1) => {
+
+                   if(result1){
+                    async.forEachOf(result1, (l) => {
+                        console.log(l.pins);
+                        console.log('here');
+                        children.push(l);
+                        if (children.length === result1.length) {
+                            result.children = children;
+                            res.send(result);
+                        }
+                    });
+                   }
+                    else
+                    res.send(result);
+                });
+
         }
 
     })
 
 });
-
 
 
 module.exports = router;
