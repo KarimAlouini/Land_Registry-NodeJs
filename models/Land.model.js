@@ -7,9 +7,14 @@ var landSchema = new Schema({
 
 
 
+    parent:{
+        type:Schema.ObjectId,
+        ref:'Land'
+    },
     salePrice: {
         type: Number,
-        required: false
+        required: false,
+        default:0
     },
     isForSale: {
         type: Boolean,
@@ -39,6 +44,7 @@ var landSchema = new Schema({
         type:Schema.ObjectId,
         ref:'Document'
     }],
+
     pins: [{
         longitude: {
             type: Number,
@@ -53,9 +59,11 @@ var landSchema = new Schema({
             validation: {
                 message: 'Latitude is required'
             }
-        }
+        },
 
-    }]
+
+    }],
+    children:[]
 
 });
 module.exports = mongoose.model('Land', landSchema);

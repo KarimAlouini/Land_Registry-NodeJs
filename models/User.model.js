@@ -1,5 +1,6 @@
 var mongoose = require('mongoose'),
     Schema =  mongoose.Schema,
+    documentSchema = require('./Document.schema'),
     _ = require('underscore'),
 
  userSchema = new Schema({
