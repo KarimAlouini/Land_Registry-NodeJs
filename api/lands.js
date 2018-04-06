@@ -161,7 +161,7 @@ var abi =[
 
 router.post('/addLand',function (req,res) {
 
-        console.log('addLand');
+
         var address = String(req.body.address);
         var senderPrivateKey = String(req.body.privateKey);
         var idland = String(req.body.idland);
@@ -190,6 +190,7 @@ router.post('/addLand',function (req,res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
+        //callback
         web3.eth.sendRawTransaction(raw,function (err,data) {
             if(!err)
 
@@ -295,10 +296,21 @@ router.get('/AllTransaction',function (req,res) {
         }
     });
 });
-router.get('/GetLandsFromCache',function (req,res) {
+router.get('/GetLandsFromCache/:flag',function (req,res) {
     getLogsFromCache().then(function(LogResult){
         var convertedLands=[];
-        Lands.find({},function (err,DBResult) {
+        var search = {};
+        console.log('here');
+        if (req.params.flag === 'true'){
+            console.log('if');
+            search={isForSale:'true'};
+        }
+        else{
+            console.log('else');
+            search={isForSale:'false'};
+        }
+
+        Lands.find(search,function (err,DBResult) {
             if(err){
                 res.send(err);
             }
@@ -310,6 +322,7 @@ router.get('/GetLandsFromCache',function (req,res) {
                 if(x != undefined)
                 convertedLands.push(x);
                 });
+
                 res.json(convertedLands);
             }});
     }).catch(function(error){
@@ -493,10 +506,52 @@ for(key in req.files){
 
 
 
+
+
                     l.save((err, data) => {
                         if (err)
                             res.status(500).send("data base error");
                         console.log('added to database');
+                        //bc add
+
+                      /*  var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+                        var DataPassContract = web3.eth.contract(abi);
+                        var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
+                        var privateKey = new Buffer('b16f75b5e47b178ee3135a36e4ceb1d11b773614ef4e6b6ab293b28ca05f5f43', 'hex');
+
+                        //get metamask address of user
+
+                        //callback for the database get method
+
+                        var contactFunction = dataPass.add.getData(String('0x4a2A778699Dd285171952e142e22Ed379eAE99E6'),data._id,'xxx',hashes);
+                        var number = web3.eth.getTransactionCount('0x4a2A778699Dd285171952e142e22Ed379eAE99E6',"pending");
+                        console.log(web3.version);
+                        var rawTx = {
+                            nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
+                            gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
+                            gasLimit: web3.toHex(3000000),
+                            from: '0x4a2A778699Dd285171952e142e22Ed379eAE99E6',
+                            to: '0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e', // contract address
+                            value: '0x00',
+                            data: String(contactFunction)
+                        };
+
+                        var tx = new Tx(rawTx);
+                        tx.sign(privateKey);
+
+                        var serializedTx = tx.serialize();
+                        var raw = '0x' + serializedTx.toString('hex');
+                        web3.eth.sendRawTransaction(raw,function (err,bcData) {
+                            if(!err){
+                                data.transaction=bcData;
+                                res.send(data);
+                            }
+
+
+                            else
+                                res.send(err);
+                        });*/
+
                         res.json(data);
                     })
                 }

@@ -5,9 +5,9 @@ var mongoose = require('mongoose'),
 var landSchema = new Schema({
 
 
-    land:{
-        type:Schema.ObjectId,
-        ref:'land'
+    land: {
+        type: Schema.ObjectId,
+        ref: 'land'
     },
     name: String,
     hash: String,
