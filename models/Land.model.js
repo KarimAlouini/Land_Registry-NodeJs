@@ -1,14 +1,20 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-
     _ = require('underscore');
 
 
 var landSchema = new Schema({
 
+
+
+    parent:{
+        type:Schema.ObjectId,
+        ref:'Land'
+    },
     salePrice: {
         type: Number,
-        required: false
+        required: false,
+        default:0
     },
     isForSale: {
         type: Boolean,
@@ -34,6 +40,10 @@ var landSchema = new Schema({
         type:Boolean,
         default:false
     },
+    documents: [{
+        type:Schema.ObjectId,
+        ref:'Document'
+    }],
 
     pins: [{
         longitude: {
@@ -49,9 +59,11 @@ var landSchema = new Schema({
             validation: {
                 message: 'Latitude is required'
             }
-        }
+        },
 
-    }]
+
+    }],
+    children:[]
 
 });
 module.exports = mongoose.model('Land', landSchema);

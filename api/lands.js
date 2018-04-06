@@ -161,7 +161,7 @@ var abi =[
 
 router.post('/addLand',function (req,res) {
 
-
+        console.log('addLand');
         var address = String(req.body.address);
         var senderPrivateKey = String(req.body.privateKey);
         var idland = String(req.body.idland);
@@ -217,8 +217,8 @@ router.get('/transactionStatus/:hash', function (req, res) {
     })
 });
 
-router.get('/accessCheck/:address',verifyToken,function (req,res) {
-    var address=String(req.params.address);
+router.get('/accessCheck/:address', verifyToken, function (req, res) {
+    var address = String(req.params.address);
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
@@ -287,7 +287,7 @@ router.get('/AllTransaction',function (req,res) {
         if(!err){
             var transactions=[];
             for (i = logs.length-3; i < logs.length; i++) {
-                transactions.push({"time":web3.eth.getBlock(logs[i].blockNumber).timestamp,"blockHash":logs[i].transactionHash});
+                transactions.push({"time":web3.eth.getBlock(logs[i].blockNumber).timestamp,"blockHash":logs[i].blockHash});
             };
             res.json(transactions);
         }
@@ -296,21 +296,10 @@ router.get('/AllTransaction',function (req,res) {
         }
     });
 });
-router.get('/GetLandsFromCache/:flag',function (req,res) {
+router.get('/GetLandsFromCache',function (req,res) {
     getLogsFromCache().then(function(LogResult){
         var convertedLands=[];
-        var search = {};
-        console.log('here');
-        if (req.params.flag === 'true'){
-            console.log('if');
-            search={isForSale:'true'};
-        }
-        else{
-            console.log('else');
-            search={isForSale:'false'};
-        }
-
-        Lands.find(search,function (err,DBResult) {
+        Lands.find({},function (err,DBResult) {
             if(err){
                 res.send(err);
             }
@@ -322,7 +311,6 @@ router.get('/GetLandsFromCache/:flag',function (req,res) {
                 if(x != undefined)
                 convertedLands.push(x);
                 });
-
                 res.json(convertedLands);
             }});
     }).catch(function(error){
@@ -352,9 +340,9 @@ router.post('/add', (req, res) => {
     console.log('here');
 
 
-for(key in req.files){
-    docs.push(req.files[key]);
-}
+    for (key in req.files) {
+        docs.push(req.files[key]);
+    }
 
     console.log(docs.length);
 
@@ -456,7 +444,6 @@ for(key in req.files){
                                 else {
                                     console.log('no error during upload');
                                     files.push(element);
-
                                 }
 
 
@@ -551,6 +538,9 @@ for(key in req.files){
                             if(!err)
 
                                 res.send(data);
+                            }
+
+
                             else
                                 res.send(err);
                         });

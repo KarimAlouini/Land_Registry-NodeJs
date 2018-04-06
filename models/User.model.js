@@ -40,6 +40,12 @@ var mongoose = require('mongoose'),
         required:true,
         trim:true
     },
+    documents:[
+        {
+            type:Schema.ObjectId,
+            ref:'Document'
+        }
+    ],
      role:{
         type:String,
          default:'User',
