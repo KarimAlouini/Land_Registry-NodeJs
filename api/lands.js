@@ -473,35 +473,7 @@ for(key in req.files){
                     var l = new Lands(land);
                     l.documents = [];
 
-                    var hashes = '';
-                    async.forEachOf(files, (file) => {
 
-                        var readStream = fs.createReadStream(path.join(landPath, file.name));
-                        var chunks = '';
-                        readStream.on('data', function (chunk) {
-
-
-                            chunks += chunk;
-                        })
-
-                            .on('end', function () {
-
-                                console.log(sha256(chunks));
-                                hashes += chunks;
-
-                                var d = new Document({
-                                    name: file.name,
-                                    hash: sha256(chunks)
-
-                                });
-
-                                d.save((err,dRes)=>{
-                                    console.log(err);
-                                    console.log(dRes);
-                                });
-
-                            })
-                    });
 
 
 
@@ -514,23 +486,56 @@ for(key in req.files){
                         console.log('added to database');
                         //bc add
 
-                      /*  var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+                        var hashes = '';
+                        async.forEachOf(files, (file) => {
+
+                            var readStream = fs.createReadStream(path.join(landPath, file.name));
+                            var chunks = '';
+                            readStream.on('data', function (chunk) {
+
+
+                                chunks += chunk;
+                            })
+
+                                .on('end', function () {
+
+
+                                    hashes += chunks;
+
+                                    var d = new Document({
+                                        hash:chunks,
+                                        name:file.filename,
+                                        land:data._id
+
+                                    });
+
+                                    d.save();
+
+
+                                })
+                        });
+
+
+
+
+                        var address = "0x139004Bde1477225d762525E239ad268028B147C";
+                        var senderPrivateKey = "a33ab189063d9def26cf2435b0c0e47cf38347899865c5d037a96c8b190fb96f";
+                        var idland = ''+data._id;
+                        var hashedInfos =  ''+sha256(data.owner+data.pins);
+                        var hashDocs =  ''+sha256(hashes);
+
+                        var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
                         var DataPassContract = web3.eth.contract(abi);
                         var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
-                        var privateKey = new Buffer('b16f75b5e47b178ee3135a36e4ceb1d11b773614ef4e6b6ab293b28ca05f5f43', 'hex');
-
-                        //get metamask address of user
-
-                        //callback for the database get method
-
-                        var contactFunction = dataPass.add.getData(String('0x4a2A778699Dd285171952e142e22Ed379eAE99E6'),data._id,'xxx',hashes);
-                        var number = web3.eth.getTransactionCount('0x4a2A778699Dd285171952e142e22Ed379eAE99E6',"pending");
+                        var privateKey = new Buffer(senderPrivateKey, 'hex');
+                        var contactFunction = dataPass.add.getData(String(address),idland,hashedInfos,hashDocs);
+                        var number = web3.eth.getTransactionCount(address,"pending");
                         console.log(web3.version);
                         var rawTx = {
                             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
                             gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
                             gasLimit: web3.toHex(3000000),
-                            from: '0x4a2A778699Dd285171952e142e22Ed379eAE99E6',
+                            from: address,
                             to: '0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e', // contract address
                             value: '0x00',
                             data: String(contactFunction)
@@ -541,18 +546,17 @@ for(key in req.files){
 
                         var serializedTx = tx.serialize();
                         var raw = '0x' + serializedTx.toString('hex');
-                        web3.eth.sendRawTransaction(raw,function (err,bcData) {
-                            if(!err){
-                                data.transaction=bcData;
+                        //callback
+                        web3.eth.sendRawTransaction(raw,function (err,data) {
+                            if(!err)
+
                                 res.send(data);
-                            }
-
-
                             else
                                 res.send(err);
-                        });*/
+                        });
 
-                        res.json(data);
+                        //bc add
+                        //res.json(data);
                     })
                 }
 
@@ -597,6 +601,9 @@ router.get('/users/:address',function (req,res) {
         }
 
         });
+});
+router.get('/karim',function(req,res){
+
 });
 router.get('/getLandByID/:id',function (req,res) {
     var id = req.params.id;
