@@ -18,6 +18,7 @@ var utils = require('../utils/utils');
 var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto-js');
+var Document = require('../models/Document.schema');
 
 var abi = [
     {
@@ -160,7 +161,7 @@ var abi = [
 
 router.post('/addLand', function (req, res) {
 
-        console.log('addLand');
+
         var address = String(req.body.address);
         var senderPrivateKey = String(req.body.privateKey);
         var idland = String(req.body.idland);
@@ -189,8 +190,9 @@ router.post('/addLand', function (req, res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
-        web3.eth.sendRawTransaction(raw, function (err, data) {
-            if (!err)
+        //callback
+        web3.eth.sendRawTransaction(raw,function (err,data) {
+            if(!err)
 
                 res.send(data);
             else
@@ -218,15 +220,15 @@ router.get('/accessCheck/:address', verifyToken, function (req, res) {
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    jwt.verify(req.token, 'quadraSecretKey', function (err, authData) {
-        if (err) {
+    jwt.verify(req.token,'quadraSecretKey',function (err,authData) {
+        if(err || (authData.role != "admin")){
             res.sendStatus(403);
         } else {
             dataPass.accessCheck.call(address, function (err, result) {
                 if (err) {
                     res.send('a problem');
                 } else {
-                    res.json({"result": result, 'authData': authData})
+                    res.json({"result":result})
                 }
             });
         }
@@ -276,16 +278,15 @@ router.get('/AllTransaction', function (req, res) {
     var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    var Event = dataPass.LogReturn({}, {fromBlock: 90, toBlock: 'latest'});
+    var Event = dataPass.LogReturn({}, {fromBlock: 0, toBlock: 'latest'});
 
 
-    Event.get(function (err, logs) {
-        if (!err) {
-            var transactions = [];
-            for (i = logs.length - 5; i < logs.length; i++) {
-                transactions.push(new Date(Date.now() - (web3.eth.getBlock(2955825).timestamp)));
-            }
-            ;
+    Event.get(function (err,logs) {
+        if(!err){
+            var transactions=[];
+            for (i = logs.length-3; i < logs.length; i++) {
+                transactions.push({"time":web3.eth.getBlock(logs[i].blockNumber).timestamp,"blockHash":logs[i].transactionHash});
+            };
             res.json(transactions);
         }
         else {
@@ -293,11 +294,22 @@ router.get('/AllTransaction', function (req, res) {
         }
     });
 });
-router.get('/GetLandsFromCache', function (req, res) {
-    getLogsFromCache().then(function (LogResult) {
-        var convertedLands = [];
-        Lands.find({}, function (err, DBResult) {
-            if (err) {
+router.get('/GetLandsFromCache/:flag',function (req,res) {
+    getLogsFromCache().then(function(LogResult){
+        var convertedLands=[];
+        var search = {};
+        console.log('here');
+        if (req.params.flag === 'true'){
+            console.log('if');
+            search={isForSale:'true'};
+        }
+        else{
+            console.log('else');
+            search={isForSale:'false'};
+        }
+
+        Lands.find(search,function (err,DBResult) {
+            if(err){
                 res.send(err);
             }
             else {
@@ -308,6 +320,7 @@ router.get('/GetLandsFromCache', function (req, res) {
                     if (x != undefined)
                         convertedLands.push(x);
                 });
+
                 res.json(convertedLands);
             }
         });
@@ -487,6 +500,7 @@ router.post('/add', (req, res) => {
                                 else {
                                     console.log('no error during upload');
                                     files.push(element);
+
                                 }
 
 
@@ -518,19 +532,70 @@ router.post('/add', (req, res) => {
 
                                 console.log(sha256(chunks));
                                 hashes += chunks;
-                                l.documents.push({
+
+                                var d = new Document({
                                     name: file.name,
                                     hash: sha256(chunks)
 
-                                })
+                                });
+
+                                d.save((err,dRes)=>{
+                                    console.log(err);
+                                    console.log(dRes);
+                                });
+
                             })
                     });
+
+
+
+
 
 
                     l.save((err, data) => {
                         if (err)
                             res.status(500).send("data base error");
                         console.log('added to database');
+                        //bc add
+
+                      /*  var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+                        var DataPassContract = web3.eth.contract(abi);
+                        var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
+                        var privateKey = new Buffer('b16f75b5e47b178ee3135a36e4ceb1d11b773614ef4e6b6ab293b28ca05f5f43', 'hex');
+
+                        //get metamask address of user
+
+                        //callback for the database get method
+
+                        var contactFunction = dataPass.add.getData(String('0x4a2A778699Dd285171952e142e22Ed379eAE99E6'),data._id,'xxx',hashes);
+                        var number = web3.eth.getTransactionCount('0x4a2A778699Dd285171952e142e22Ed379eAE99E6',"pending");
+                        console.log(web3.version);
+                        var rawTx = {
+                            nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
+                            gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
+                            gasLimit: web3.toHex(3000000),
+                            from: '0x4a2A778699Dd285171952e142e22Ed379eAE99E6',
+                            to: '0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e', // contract address
+                            value: '0x00',
+                            data: String(contactFunction)
+                        };
+
+                        var tx = new Tx(rawTx);
+                        tx.sign(privateKey);
+
+                        var serializedTx = tx.serialize();
+                        var raw = '0x' + serializedTx.toString('hex');
+                        web3.eth.sendRawTransaction(raw,function (err,bcData) {
+                            if(!err){
+                                data.transaction=bcData;
+                                res.send(data);
+                            }
+
+
+                            else
+                                res.send(err);
+                        });*/
+
                         res.json(data);
                     })
                 }
@@ -610,6 +675,24 @@ router.get('/getLandByID/:id', function (req, res) {
 
     })
 
+});
+
+router.post('/AgentLogin',function (req,res) {
+    var login = req.body.login;
+    var pwd = req.body.pwd;
+    User.find({'login' : login, 'password':pwd},function (err,result) {
+        if(err){
+            res.send(err);
+        }
+        if(result){
+            if(result.length==0)
+            {
+            res.status(404);
+            }
+            res.json(result[0]);
+        }
+
+    });
 });
 
 
