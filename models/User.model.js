@@ -1,6 +1,5 @@
 var mongoose = require('mongoose'),
     Schema =  mongoose.Schema,
-    documentSchema = require('./Document.schema'),
     _ = require('underscore'),
 
  userSchema = new Schema({
@@ -40,7 +39,12 @@ var mongoose = require('mongoose'),
         required:true,
         trim:true
     },
-    documents:documentSchema,
+    documents:[
+        {
+            type:Schema.ObjectId,
+            ref:'Document'
+        }
+    ],
      role:{
         type:String,
          default:'User',

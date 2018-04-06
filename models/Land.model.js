@@ -1,10 +1,11 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-    documentSchema = require('./Document.schema'),
     _ = require('underscore');
 
 
 var landSchema = new Schema({
+
+
 
     salePrice: {
         type: Number,
@@ -35,15 +36,8 @@ var landSchema = new Schema({
         default:false
     },
     documents: [{
-
-        name: String,
-        hash: String,
-        dateAdded:
-            {
-                type: Date,
-                default:
-                Date.now
-            }
+        type:Schema.ObjectId,
+        ref:'Document'
     }],
     pins: [{
         longitude: {
