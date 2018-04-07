@@ -40,6 +40,7 @@ app.use('/users', users);
 app.use('/lands', lands);
 app.use('/api/lands', landsApi);
 app.use('/api/landDb', landDbApi);
+app.use('/api/users', require('./api/users'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

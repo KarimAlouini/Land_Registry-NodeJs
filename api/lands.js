@@ -18,6 +18,7 @@ var fs = require('fs');
 var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
+var md5 = require('md5');
 
 router.post('/addLand', function (req, res) {
 
@@ -463,23 +464,7 @@ router.get('/getLandByID/:id', function (req, res) {
 
 });
 
-router.post('/AgentLogin', function (req, res) {
 
-    var login = req.body.login;
-    var pwd = req.body.pwd;
-    User.find({'login': login, 'password': pwd}, function (err, result) {
-        if (err) {
-            res.send(err);
-        }
-        if (result) {
-            if (result.length == 0) {
-                res.status(404);
-            }
-            res.json(result[0]);
-        }
-
-    });
-});
 
 
 module.exports = router;
