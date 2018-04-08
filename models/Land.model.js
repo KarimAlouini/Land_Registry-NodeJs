@@ -1,10 +1,11 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-
     _ = require('underscore');
 
 
 var landSchema = new Schema({
+
+
 
     parent:{
         type:Schema.ObjectId,
@@ -39,6 +40,10 @@ var landSchema = new Schema({
         type:Boolean,
         default:false
     },
+    documents: [{
+        type:Schema.ObjectId,
+        ref:'Document'
+    }],
 
     pins: [{
         longitude: {
