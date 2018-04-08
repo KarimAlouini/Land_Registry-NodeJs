@@ -18,8 +18,7 @@ var fs = require('fs');
 var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
-var geocoder = require('../config/Geocoder');
-
+var md5 = require('md5');
 
 router.post('/addLand', function (req, res) {
 
@@ -182,12 +181,105 @@ router.get('/GetLandsFromCache', function (req, res) {
     })
 });
 
-function getLogsFromCache() {
+router.get('/GetLandsFromCache/:flag', function (req, res) {
+    getLogsFromCache().then(function (LogResult) {
+        var convertedLands = [];
+        var search = {};
+        console.log('here');
+        if (req.params.flag === 'true') {
+            console.log('if');
+            search = {isForSale: 'true'};
+        }
+        else {
+            console.log('else');
+            search = {isForSale: 'false'};
+        }
+
+        Lands.find(search, function (err, DBResult) {
+            if (err) {
+                res.send(err);
+            }
+            else {
+                LogResult.forEach(function (object) {
+                    var x = DBResult.find(function (element) {
+                        return element._id == object.id;
+                    });
+                    if (x != undefined)
+                        convertedLands.push(x);
+                });
+
+                res.json(convertedLands);
+            }
+        });
+    }).catch(function (error) {
+        res.send(error);
+    })
+});
+
+
+router.get('/getallfromcache', function (req, res) {
+    console.log('here');
+    getLogsFromCache().then(function (LogResult) {
+        var convertedLands = [];
+
+
+        Lands.find({}, function (err, DBResult) {
+            if (err) {
+                res.send(err);
+            }
+            else {
+                async.forEachOf(LogResult, function (object, index) {
+
+                    var x = DBResult.find(function (element) {
+                        return element._id == object.id;
+                    });
+
+
+                    if (x != undefined) {
+                        convertedLands.push(x);
+
+                    }
+
+
+                });
+
+
+                var children = [];
+
+                async.forEachOf(convertedLands,(elem,index)=>{
+                    Lands.find({'parent':new objectId(elem._id)},(err,result)=>{
+
+                        convertedLands[index].children = result;
+                        children.push(result);
+
+                        console.log(convertedLands.length);
+                        console.log(children.length);
+                        if (convertedLands.length === children.length){
+                            console.log('true');
+                            res.send(convertedLands);
+                        }
+
+                    });
+
+
+
+                });
+
+
+
+
+            }
+        });
+    }).catch(function (error) {
+        res.send(error);
+    })
+});
+
+function getLogsFromCache(url) {
     return new Promise(function (resolve, reject) {
-        request(constants.cacheServerAddress,
+        request('http://54.76.154.101:3000',
             function (error, response, body) {
                 if (error) {
-                    console.log(error);
                     reject(" problem ");
                 }
                 else {
@@ -197,6 +289,54 @@ function getLogsFromCache() {
     })
 }
 
+
+router.post('/divide/:id', (req, res) => {
+    Lands.findById(req.params.id, function (err, result) {
+        console.log(req.body);
+        if (err) {
+            res.send(err);
+        } else {
+
+            var land = result;
+            console.log(land.dividable);
+            if (land.dividable === 'false') {
+
+                res.status(400).send();
+            }
+
+            else {
+                land.documents = [];
+                var childrenIds = [];
+                async.forEachOf(req.body.children, (child) => {
+
+                    var l = new Lands({
+                        owner: land.owner,
+                        pins: child.pins,
+                        parent: land._id
+                    });
+
+                    l.save((err, result) => {
+
+
+                        console.log(`children length ${childrenIds.length}`);
+                        console.log(`body children length ${req.body.children.length}`);
+                        childrenIds.push(result._id);
+
+                        if (childrenIds.length === req.body.children.length) {
+                            console.log('equals');
+                            res.send('ok');
+                        }
+                    });
+
+                });
+            }
+
+
+        }
+
+    });
+
+});
 router.post('/add', (req, res) => {
     console.log("start");
 
@@ -459,35 +599,38 @@ router.get('/getLandByID/:id', function (req, res) {
         if (err) {
             res.send(err);
         } else {
-            res.json(result[0]);
+
+            if (result == null)
+                res.status(404).send();
+
+
+           else{
+                var children = [];
+
+                Lands.find({parent: result._id}, (err, result1) => {
+
+                    if(result1){
+                        async.forEachOf(result1, (l) => {
+                            console.log(l.pins);
+                            console.log('here');
+                            children.push(l);
+                            if (children.length === result1.length) {
+                                result.children = children;
+                                res.send(result);
+                            }
+                        });
+                    }
+                    else
+                        res.send(result);
+                });
+            }
+
         }
 
     })
 
 });
 
-
-router.get('/getLandByCity/:city', (req, res) => {
-    var cityName = req.params.city+ ',Tunisia';
-    geocoder.geocode(cityName)
-        .then(function(result) {
-            res.json(result);
-        })
-        .catch(function(err) {
-            console.log(err);
-        });
-
-
-});
-
-
-router.get('/getLandByLngLat/:lng/:lat',(req,res)=>{
-   //console.log(req.params.lat);
-    geocoder.reverse({lat:req.params.lat, lon:req.params.lng}, function(err, result) {
-        res.send(result);
-    });
-
-});
 
 
 
