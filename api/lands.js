@@ -19,8 +19,7 @@ var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
 var md5 = require('md5');
-
-router.post('/addLand', function (req, res) {
+router.post('/addLand',function (req,res) {
 
         console.log('addLand');
         var address = String(req.body.address);
@@ -29,16 +28,12 @@ router.post('/addLand', function (req, res) {
         var hashedInfos = String(req.body.hashedInfos);
         var hashDocs = String(req.body.hashDocs);
 
-<<<<<<< HEAD
-        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
-=======
         var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
->>>>>>> master
-        var DataPassContract = web3.eth.contract(abi);
+        var DataPassContract = web3.eth.contract(constants.contractAbi);
         var dataPass = DataPassContract.at(constants.contractAddress);
         var privateKey = new Buffer(senderPrivateKey, 'hex');
-        var contactFunction = dataPass.add.getData(String(address), idland, hashedInfos, hashDocs);
-        var number = web3.eth.getTransactionCount(address, "pending");
+        var contactFunction = dataPass.add.getData(String(address),idland,hashedInfos,hashDocs);
+        var number = web3.eth.getTransactionCount(address,"pending");
         console.log(web3.version);
         var rawTx = {
             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
@@ -55,14 +50,8 @@ router.post('/addLand', function (req, res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
-<<<<<<< HEAD
         web3.eth.sendRawTransaction(raw,function (err,data) {
             if(!err)
-=======
-        web3.eth.sendRawTransaction(raw, function (err, data) {
-            if (!err)
-
->>>>>>> master
                 res.send(data);
             else
                 res.send(err);
