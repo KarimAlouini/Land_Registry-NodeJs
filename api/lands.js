@@ -103,25 +103,25 @@ router.get('/accessCheck/:address', verifyToken, function (req, res) {
 });
 router.post('/addAgent', function (req, res) {
 
-    var address = String(req.body.SenderAddress);
-    var agentAddress = String(req.body.AgentAddress);
-    var senderPrivateKey = String(req.body.privateKey);
-    var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
-    var DataPassContract = web3.eth.contract(abi);
-    var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    var privateKey = new Buffer(senderPrivateKey, 'hex');
-    var contactFunction = dataPass.addAgent.getData(agentAddress);
-    var number = web3.eth.getTransactionCount(address, "pending");
-    console.log(web3.version);
-    var rawTx = {
-        nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
-        gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
-        gasLimit: web3.toHex(3000000),
-        from: address,
-        to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
-        value: '0x00',
-        data: String(contactFunction)
-    };
+        var address = String(req.body.SenderAddress);
+        var agentAddress = String(req.body.AgentAddress);
+        var senderPrivateKey = String(req.body.privateKey);
+        var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
+        var DataPassContract = web3.eth.contract(abi);
+        var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+        var privateKey = new Buffer(senderPrivateKey, 'hex');
+        var contactFunction = dataPass.addAgent.getData(agentAddress);
+        var number = web3.eth.getTransactionCount(address, "pending");
+        console.log(web3.version);
+        var rawTx = {
+            nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
+            gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
+            gasLimit: web3.toHex(3000000),
+            from: address,
+            to: '0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b', // contract address
+            value: '0x00',
+            data: String(contactFunction)
+        };
 
     var tx = new Tx(rawTx);
     tx.sign(privateKey);
