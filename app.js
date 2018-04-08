@@ -9,7 +9,7 @@ const fileUpload = require('express-fileupload');
 
 var server = require('http').createServer(app)
 var io = require('socket.io')(server)
-
+var session = require('express-session');
 var index = require('./routes/index');
 var users = require('./routes/users'),
     lands = require('./routes/lands');
@@ -29,11 +29,18 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+app.use(session({
+    secret: "fd34s@!@dfa453f3DF#$D&W",
+    resave: true,
+    saveUninitialized: true,
+    cookie: { secure: !true }
+}));
 app.use('/', index);
 app.use('/users', users);
 app.use('/lands', lands);
 app.use('/api/lands', landsApi);
 app.use('/api/landDb', landDbApi);
+app.use('/api/users', require('./api/users'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

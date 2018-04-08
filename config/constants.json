@@ -1,5 +1,5 @@
 {
-  "contractAddress":"0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b",
+  "contractAddress":"0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e",
   "providerAddress":"http://34.246.20.177:8545",
   "contractAbi":[
     {
@@ -140,5 +140,6 @@
     }
   ],
   "appPublicKey":"0x677ed04cafa0b5367eb13607a2367a5e870c8ba2",
-  "appPrivateKey":"5E97DCED10E52151F7CF84973072E6E4C65AA9D841A51C602A6B8CDD53205E30"
+  "appPrivateKey":"5E97DCED10E52151F7CF84973072E6E4C65AA9D841A51C602A6B8CDD53205E30",
+  "jwtSecret":"quadraSecretKey"
 }

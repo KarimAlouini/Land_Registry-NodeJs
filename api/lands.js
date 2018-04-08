@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var Lands = require('../models/Land.model');
 var User = require('../models/User.model');
-const request = require('request')
+const request= require('request')
 var Web3 = require('web3');
 var jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
@@ -19,147 +19,16 @@ var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto-js');
 var Document = require('../models/Document.schema');
+var md5 = require('md5');
+var abi = constants.contractAbi;
+var constants = require('../config/constants');
 
-var abi = [
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_address",
-                "type": "address"
-            },
-            {
-                "name": "_idInDB",
-                "type": "string"
-            },
-            {
-                "name": "_hashedInfos",
-                "type": "string"
-            },
-            {
-                "name": "_hashDocs",
-                "type": "string"
-            }
-        ],
-        "name": "add",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_address",
-                "type": "address"
-            }
-        ],
-        "name": "addAgent",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "name": "MyAddress",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "name": "idInDB",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "name": "hashedInfos",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "name": "hashDocs",
-                "type": "string"
-            }
-        ],
-        "name": "LogReturn",
-        "type": "event"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "_senderAddress",
-                "type": "address"
-            }
-        ],
-        "name": "accessCheck",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "agents",
-        "outputs": [
-            {
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [
-            {
-                "name": "",
-                "type": "address"
-            },
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "properties",
-        "outputs": [
-            {
-                "name": "idInDB",
-                "type": "string"
-            },
-            {
-                "name": "hashedInfos",
-                "type": "string"
-            },
-            {
-                "name": "hashDocs",
-                "type": "string"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    }
-];
 
 router.post('/addLand', function (req, res) {
+var constants = require('../config/constants');
+var abi = constants.contractAbi;
+var md5 = require('md5');
+router.post('/addLand',function (req,res) {
 
         console.log('addLand');
         var address = String(req.body.address);
@@ -168,19 +37,19 @@ router.post('/addLand', function (req, res) {
         var hashedInfos = String(req.body.hashedInfos);
         var hashDocs = String(req.body.hashDocs);
 
-        var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
-        var DataPassContract = web3.eth.contract(abi);
-        var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
+        var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
+        var DataPassContract = web3.eth.contract(constants.contractAbi);
+        var dataPass = DataPassContract.at(constants.contractAddress);
         var privateKey = new Buffer(senderPrivateKey, 'hex');
-        var contactFunction = dataPass.add.getData(String(address), idland, hashedInfos, hashDocs);
-        var number = web3.eth.getTransactionCount(address, "pending");
+        var contactFunction = dataPass.add.getData(String(address),idland,hashedInfos,hashDocs);
+        var number = web3.eth.getTransactionCount(address,"pending");
         console.log(web3.version);
         var rawTx = {
             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
             gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
             gasLimit: web3.toHex(3000000),
             from: address,
-            to: '0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e', // contract address
+            to: constants.contractAddress, // contract address
             value: '0x00',
             data: String(contactFunction)
         };
@@ -190,10 +59,8 @@ router.post('/addLand', function (req, res) {
 
         var serializedTx = tx.serialize();
         var raw = '0x' + serializedTx.toString('hex');
-        //callback
-        web3.eth.sendRawTransaction(raw, function (err, data) {
-            if (!err)
-
+        web3.eth.sendRawTransaction(raw,function (err,data) {
+            if(!err)
                 res.send(data);
             else
                 res.send(err);
@@ -203,9 +70,11 @@ router.post('/addLand', function (req, res) {
 );
 
 
+
+
 router.get('/transactionStatus/:hash', function (req, res) {
     var hash = req.params.hash;
-    var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+    var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
 
     web3.eth.getTransactionReceipt(hash, function (err, data) {
         if (!err)
@@ -217,18 +86,18 @@ router.get('/transactionStatus/:hash', function (req, res) {
 
 router.get('/accessCheck/:address', verifyToken, function (req, res) {
     var address = String(req.params.address);
-    var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+    var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
     var DataPassContract = web3.eth.contract(abi);
-    var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
-    jwt.verify(req.token, 'quadraSecretKey', function (err, authData) {
+    var dataPass = DataPassContract.at(constants.providerAddress);
+    jwt.verify(req.token, constants.jwtSecret, function (err, authData) {
         if (err || (authData.role != "admin")) {
             res.sendStatus(403);
-        } else {
-            dataPass.accessCheck.call(address, function (err, result) {
-                if (err) {
+        }else{
+            dataPass.accessCheck.call(address,function(err, result) {
+                if(err) {
                     res.send('a problem');
                 } else {
-                    res.json({"result": result})
+                    res.json({"result":result})
                 }
             });
         }
@@ -236,12 +105,12 @@ router.get('/accessCheck/:address', verifyToken, function (req, res) {
 
 
 });
-router.post('/addAgent', function (req, res) {
+router.post('/addAgent',function (req,res) {
 
         var address = String(req.body.SenderAddress);
         var agentAddress = String(req.body.AgentAddress);
         var senderPrivateKey = String(req.body.privateKey);
-        var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+        var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
@@ -275,7 +144,7 @@ router.post('/addAgent', function (req, res) {
 );
 
 router.get('/AllTransaction', function (req, res) {
-    var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+    var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
     var DataPassContract = web3.eth.contract(abi);
     var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
     var Event = dataPass.LogReturn({}, {fromBlock: 0, toBlock: 'latest'});
@@ -349,12 +218,12 @@ router.get('/GetLandsFromCache/:flag',function (req,res) {
                 });
 
                 res.json(convertedLands);
-            }});
-    }).catch(function(error){
+            }
+        });
+    }).catch(function (error) {
         res.send(error);
     })
 });
-
 
 function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
@@ -493,14 +362,15 @@ router.post('/add', (req, res) => {
     });
 });
 
+});
 router.post('/generatToken', function (req, res) {
-    jwt.sign(req.body, 'quadraSecretKey', {expiresIn: '1h'}, function (err, token) {
+    jwt.sign(req.body, constants.jwtSecret, {expiresIn: '1h'}, function (err, token) {
         if (!err)
             res.json({'token': token});
     })
 });
 
-function verifyToken(req, res, next) {
+function verifyToken(req,res,next) {
     const bearerHeader = req.headers['authorization'];
     if (typeof  bearerHeader !== 'undefined') {
         const bearer = bearerHeader.split(' ');
@@ -510,6 +380,7 @@ function verifyToken(req, res, next) {
     } else {
         res.sendStatus(403);
     }
+
 
 
 }
@@ -526,9 +397,6 @@ router.get('/users/:address', function (req, res) {
 
     });
 });
-router.get('/karim', function (req, res) {
-
-});
 router.get('/getLandByID/:id', function (req, res) {
     var id = req.params.id;
     Lands.find({'_id': id}, function (err, result) {
@@ -542,22 +410,7 @@ router.get('/getLandByID/:id', function (req, res) {
 
 });
 
-router.post('/AgentLogin', function (req, res) {
-    var login = req.body.login;
-    var pwd = req.body.pwd;
-    User.find({'login': login, 'password': pwd}, function (err, result) {
-        if (err) {
-            res.send(err);
-        }
-        if (result) {
-            if (result.length == 0) {
-                res.status(404);
-            }
-            res.json(result[0]);
-        }
 
-    });
-});
 
 
 module.exports = router;

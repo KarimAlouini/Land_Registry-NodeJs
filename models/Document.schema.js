@@ -1,9 +1,8 @@
-
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
 
 
-    documentModel = new Schema({
+    documentSchema = new Schema({
 
 
         name: String,
@@ -17,4 +16,4 @@ var mongoose = require('mongoose'),
 
 
     });
-module.exports = mongoose.model('Document', documentModel);
+module.exports = mongoose.model('Document', documentSchema);
