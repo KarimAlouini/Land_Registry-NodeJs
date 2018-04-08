@@ -167,7 +167,7 @@ router.post('/addLand',function (req,res) {
         var hashedInfos = String(req.body.hashedInfos);
         var hashDocs = String(req.body.hashDocs);
 
-        var web3 = new Web3(new Web3.providers.HttpProvider('http://34.246.20.177:8545'));
+        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/1RDCTkvhEAhjoZbvi73o'));
         var DataPassContract = web3.eth.contract(abi);
         var dataPass = DataPassContract.at('0x3d7d89f3ef6ec7efb5bf5e5cb9065f98b0cbb27e');
         var privateKey = new Buffer(senderPrivateKey, 'hex');
@@ -191,7 +191,6 @@ router.post('/addLand',function (req,res) {
         var raw = '0x' + serializedTx.toString('hex');
         web3.eth.sendRawTransaction(raw,function (err,data) {
             if(!err)
-
                 res.send(data);
             else
                 res.send(err);
