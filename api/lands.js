@@ -296,6 +296,7 @@ function getLogsFromCache(url) {
 
 router.post('/divide/:id', (req, res) => {
     Lands.findById(req.params.id, function (err, result) {
+        console.log(req.body);
         if (err) {
             res.send(err);
         } else {
@@ -505,27 +506,30 @@ router.get('/getLandByID/:id', function (req, res) {
             res.send(err);
         } else {
 
+            if (result == null)
+                res.status(404).send();
 
 
+           else{
+                var children = [];
 
-            var children = [];
+                Lands.find({parent: result._id}, (err, result1) => {
 
-            Lands.find({parent: result._id}, (err, result1) => {
-
-                if(result1){
-                    async.forEachOf(result1, (l) => {
-                        console.log(l.pins);
-                        console.log('here');
-                        children.push(l);
-                        if (children.length === result1.length) {
-                            result.children = children;
-                            res.send(result);
-                        }
-                    });
-                }
-                else
-                    res.send(result);
-            });
+                    if(result1){
+                        async.forEachOf(result1, (l) => {
+                            console.log(l.pins);
+                            console.log('here');
+                            children.push(l);
+                            if (children.length === result1.length) {
+                                result.children = children;
+                                res.send(result);
+                            }
+                        });
+                    }
+                    else
+                        res.send(result);
+                });
+            }
 
         }
 
