@@ -163,7 +163,7 @@ router.get('/AllTransaction', function (req, res) {
     });
 });
 router.get('/GetLandsFromCache', function (req, res) {
-    getLogsFromCache().then(function (LogResult) {
+    getLogsFromCache(constants.cacheServerAddress).then(function (LogResult) {
         var convertedLands = [];
         Lands.find({}, function (err, DBResult) {
             if (err) {
@@ -279,9 +279,9 @@ router.get('/getallfromcache', function (req, res) {
     })
 });
 
-function getLogsFromCache() {
+function getLogsFromCache(url) {
     return new Promise(function (resolve, reject) {
-        request('http://54.76.154.101:3000',
+        request(url,
             function (error, response, body) {
                 if (error) {
                     reject(" problem ");
@@ -499,16 +499,40 @@ router.get('/users/:address', function (req, res) {
 });
 router.get('/getLandByID/:id', function (req, res) {
     var id = req.params.id;
-    Lands.find({'_id': id}, function (err, result) {
+    Lands.findById(id, function (err, result) {
+
         if (err) {
             res.send(err);
         } else {
-            res.json(result[0]);
+
+
+
+
+            var children = [];
+
+            Lands.find({parent: result._id}, (err, result1) => {
+
+                if(result1){
+                    async.forEachOf(result1, (l) => {
+                        console.log(l.pins);
+                        console.log('here');
+                        children.push(l);
+                        if (children.length === result1.length) {
+                            result.children = children;
+                            res.send(result);
+                        }
+                    });
+                }
+                else
+                    res.send(result);
+            });
+
         }
 
     })
 
 });
+
 
 
 module.exports = router;
