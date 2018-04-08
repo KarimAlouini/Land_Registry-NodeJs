@@ -18,7 +18,8 @@ var fs = require('fs');
 var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
-var md5 = require('md5');
+var geocoder = require('../config/Geocoder');
+
 
 router.post('/addLand', function (req, res) {
 
@@ -183,9 +184,10 @@ router.get('/GetLandsFromCache', function (req, res) {
 
 function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
-        request('http://54.76.154.101:3000',
+        request(constants.cacheServerAddress,
             function (error, response, body) {
                 if (error) {
+                    console.log(error);
                     reject(" problem ");
                 }
                 else {
@@ -464,6 +466,28 @@ router.get('/getLandByID/:id', function (req, res) {
 
 });
 
+
+router.get('/getLandByCity/:city', (req, res) => {
+    var cityName = req.params.city+ ',Tunisia';
+    geocoder.geocode(cityName)
+        .then(function(result) {
+            res.json(result);
+        })
+        .catch(function(err) {
+            console.log(err);
+        });
+
+
+});
+
+
+router.get('/getLandByLngLat/:lng/:lat',(req,res)=>{
+   //console.log(req.params.lat);
+    geocoder.reverse({lat:req.params.lat, lon:req.params.lng}, function(err, result) {
+        res.send(result);
+    });
+
+});
 
 
 

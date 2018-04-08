@@ -6,15 +6,14 @@ var mongoose = require('mongoose'),
 var landSchema = new Schema({
 
 
-
-    parent:{
-        type:Schema.ObjectId,
-        ref:'Land'
+    parent: {
+        type: Schema.ObjectId,
+        ref: 'Land'
     },
     salePrice: {
         type: Number,
         required: false,
-        default:0
+        default: 0
     },
     isForSale: {
         type: Boolean,
@@ -32,17 +31,21 @@ var landSchema = new Schema({
     localization: {
 
         street: String,
-        city: String,
+        city: {
+            type: Schema.ObjectId,
+            required: true,
+            ref: 'City'
+        },
         number: Number,
         zipCode: Number
     },
-    dividable:{
-        type:Boolean,
-        default:false
+    dividable: {
+        type: Boolean,
+        default: false
     },
     documents: [{
-        type:Schema.ObjectId,
-        ref:'Document'
+        type: Schema.ObjectId,
+        ref: 'Document'
     }],
 
     pins: [{
@@ -63,7 +66,7 @@ var landSchema = new Schema({
 
 
     }],
-    children:[]
+    children: []
 
 });
 module.exports = mongoose.model('Land', landSchema);
