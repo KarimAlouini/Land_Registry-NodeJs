@@ -329,6 +329,32 @@ router.get('/GetLandsFromCache/:flag',function (req,res) {
     })
 });
 
+router.get('/getallfromcache',function (req,res) {
+    getLogsFromCache().then(function(LogResult){
+        var convertedLands=[];
+
+
+
+        Lands.find({},function (err,DBResult) {
+            if(err){
+                res.send(err);
+            }
+            else {
+                LogResult.forEach(function (object) {
+                    var x = DBResult.find(function (element) {
+                        return element._id == object.id;
+                    });
+                    if (x != undefined)
+                        convertedLands.push(x);
+                });
+
+                res.json(convertedLands);
+            }
+        });
+    }).catch(function (error) {
+        res.send(error);
+    })
+});
 function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
         request('http://54.76.154.101:3000',
@@ -342,6 +368,9 @@ function getLogsFromCache() {
             })
     })
 }
+
+
+
 
 router.post('/divide/:id', (req, res) => {
     Lands.findById(req.params.id, function (err, result) {
