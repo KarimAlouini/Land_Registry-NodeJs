@@ -19,7 +19,7 @@ var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
 var md5 = require('md5');
-
+var Document = require('../models/Document.schema');
 router.post('/addLand', function (req, res) {
 
         console.log('addLand');

@@ -2,6 +2,8 @@ var constants = require('../config/constants');
 var Lands = require('../models/Land.model');
 var async = require('async');
 var request = require('request');
+var ObjectId = require('mongoose').Types.ObjectId;
+
 function getLogsFromCache(url) {
 
     return new Promise(function (resolve, reject) {
@@ -19,44 +21,48 @@ function getLogsFromCache(url) {
 };
 
 module.exports.getAllLands = function (callback) {
-    var ret='xx';
     getLogsFromCache(constants.cacheServerAddress).then(function (LogResult) {
 
+        var lands = [];
+        console.log(LogResult.length);
+        async.forEachOf(LogResult, (logElement, index) => {
+            Lands.findOne({_id: logElement.id}, (err, land) => {
+                if (!err) {
+                    if (land !== null) {
+                        var l = {};
+                        l.info = land;
+                        l.history = logElement.info.history;
+                        l.hashedInfo = logElement.info.hashedInfo;
 
-        var convertedLands = [];
-        Lands.find({}, function (err, DBResult) {
-           // console.log(DBResult);
-            if (err) {
-              callback({
-                  code:1,
-                  err
-              });
-            }
-            else {
+                        l.hashDocs = logElement.info.hashDocs;
+                        lands.push(l);
 
-                async.forEachOf(LogResult,function (object,index) {
-                    console.log(index);
-                    var x = DBResult.find(function (element) {
-                        return element._id == object.id;
-                    });
-                    if (x != undefined)
-                        convertedLands.push(x);
-                });
+                    }
+                    else {
+                        if (index === LogResult.length - 1) {
+                            callback({
+                                code:0,
+                                data:lands
+                            });
+                        }
+                    }
+                }
 
-            }
+            });
 
+
+        });
+
+
+    })
+        .catch(function (error) {
+            console.log(error);
             callback({
-                code:0,
-                data:convertedLands
+                code: 1,
+                error
             });
         });
-    }).catch(function (error) {
-        callback( {
-            code:1,
-            error
-        });
-    });
 
-    return ret;
+
 };
 

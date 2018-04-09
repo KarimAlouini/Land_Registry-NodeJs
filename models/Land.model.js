@@ -68,5 +68,6 @@ var landSchema = new Schema({
     }],
     children: []
 
+
 });
 module.exports = mongoose.model('Land', landSchema);

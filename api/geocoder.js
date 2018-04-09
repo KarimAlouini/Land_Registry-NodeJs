@@ -69,13 +69,6 @@ router.get('/getCities/:city',(req,res)=>{
     }
 });
 
-router.get('/x',(req,res)=>{
-    console.log('x');
-    cacheManager.getAllLands((v)=>{
-        console.log(v);
-    })
-
-});
 
 
 module.exports = router;
