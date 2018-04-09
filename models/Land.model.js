@@ -31,11 +31,7 @@ var landSchema = new Schema({
     localization: {
 
         street: String,
-        city: {
-            type: Schema.ObjectId,
-            required: true,
-            ref: 'City'
-        },
+        city: String,
         number: Number,
         zipCode: Number
     },

@@ -19,6 +19,8 @@ var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
 var md5 = require('md5');
+var Document = require('../models/Document.schema');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 router.post('/addLand', function (req, res) {
 
@@ -216,66 +218,7 @@ router.get('/GetLandsFromCache/:flag', function (req, res) {
     })
 });
 
-
-router.get('/getallfromcache', function (req, res) {
-    console.log('here');
-    getLogsFromCache().then(function (LogResult) {
-        var convertedLands = [];
-
-
-        Lands.find({}, function (err, DBResult) {
-            if (err) {
-                res.send(err);
-            }
-            else {
-                async.forEachOf(LogResult, function (object, index) {
-
-                    var x = DBResult.find(function (element) {
-                        return element._id == object.id;
-                    });
-
-
-                    if (x != undefined) {
-                        convertedLands.push(x);
-
-                    }
-
-
-                });
-
-
-                var children = [];
-
-                async.forEachOf(convertedLands,(elem,index)=>{
-                    Lands.find({'parent':new objectId(elem._id)},(err,result)=>{
-
-                        convertedLands[index].children = result;
-                        children.push(result);
-
-                        console.log(convertedLands.length);
-                        console.log(children.length);
-                        if (convertedLands.length === children.length){
-                            console.log('true');
-                            res.send(convertedLands);
-                        }
-
-                    });
-
-
-
-                });
-
-
-
-
-            }
-        });
-    }).catch(function (error) {
-        res.send(error);
-    })
-});
-
-function getLogsFromCache(url) {
+function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
         request('http://54.76.154.101:3000',
             function (error, response, body) {
@@ -338,10 +281,10 @@ router.post('/divide/:id', (req, res) => {
 
 });
 router.post('/add', (req, res) => {
-    console.log("start");
+
 
     var docs = [];
-    console.log('here');
+
 
 
     for (key in req.files) {
@@ -405,7 +348,7 @@ router.post('/add', (req, res) => {
                     var files = [];
 
 
-                    console.log('start upload');
+
 
                     var landPath = path.join(__dirname, '..', 'public', 'docs', pinsHash);
                     if (!fs.existsSync(landPath)) {
@@ -416,7 +359,7 @@ router.post('/add', (req, res) => {
 
 
                     if (isNaN(docs.length)) {
-                        console.log('single file');
+
                         files.push(docs);
                         //if it's single file
                         docs.mv(path.join(landPath, docs.name), (err) => {
@@ -433,7 +376,7 @@ router.post('/add', (req, res) => {
                         });
                     }
                     else {
-                        console.log('too many files');
+
                         files = docs;
                         //if it's an array
                         async.forEachOf(docs, (element) => {
@@ -458,7 +401,7 @@ router.post('/add', (req, res) => {
                     }
 
 
-                    console.log(files.length);
+
 
 
                     var l = new Lands(land);
@@ -477,7 +420,7 @@ router.post('/add', (req, res) => {
 
                             .on('end', function () {
 
-                                console.log(sha256(chunks));
+
                                 hashes += chunks;
 
                                 var d = new Document({
@@ -487,8 +430,7 @@ router.post('/add', (req, res) => {
                                 });
 
                                 d.save((err, dRes) => {
-                                    console.log(err);
-                                    console.log(dRes);
+
                                 });
 
                             })
@@ -499,7 +441,10 @@ router.post('/add', (req, res) => {
                         if (err)
                             res.status(500).send("data base error");
                         else {
+                            console.log(`owner ${land.owner}`);
                             User.find({_id: land.owner}, (err, result) => {
+                                console.log('result '+ result);
+                                console.log(`result 0 ${result[0]}`);
 
                                 var address = constants.appPublicKey;
                                 var senderPrivateKey =constants.appPrivateKey;
@@ -511,7 +456,7 @@ router.post('/add', (req, res) => {
                                 var DataPassContract = web3.eth.contract(abi);
                                 var dataPass = DataPassContract.at(constants.contractAddress);
                                 var privateKey = new Buffer(senderPrivateKey, 'hex');
-                                console.log('this '+result.blockchainAddress);
+
                                 var contactFunction = dataPass.add.getData(String(result[0].blockchainAddress), idland, hashedInfos, hashDocs);
                                 var number = web3.eth.getTransactionCount(address, "pending");
                                 console.log(web3.version);
@@ -550,10 +495,9 @@ router.post('/add', (req, res) => {
                     });
                 }
             }
-
         }
-
     });
+
 
 });
 router.post('/generatToken', function (req, res) {
