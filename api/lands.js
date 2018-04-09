@@ -181,40 +181,40 @@ router.get('/GetLandsFromCache', function (req, res) {
     })
 });
 
-router.get('/GetLandsFromCache/:flag',function (req,res) {
-    getLogsFromCache().then(function(LogResult){
-        var convertedLands=[];
+router.get('/GetLandsFromCache/:flag', function (req, res) {
+    getLogsFromCache().then(function (LogResult) {
+        var convertedLands = [];
         var search = {};
         console.log('here');
-        if (req.params.flag === 'true'){
+        if (req.params.flag === 'true') {
             console.log('if');
-            search={isForSale:'true'};
+            search = {isForSale: 'true'};
         }
-        else{
+        else {
             console.log('else');
-            search={isForSale:'false'};
+            search = {isForSale: 'false'};
         }
 
-        Lands.find(search,function (err,DBResult) {
-            if(err){
+        Lands.find(search, function (err, DBResult) {
+            if (err) {
                 res.send(err);
             }
-            else{
+            else {
                 LogResult.forEach(function (object) {
-                    var x   =   DBResult.find(function (element) {
-                        return  element._id==object.id;
+                    var x = DBResult.find(function (element) {
+                        return element._id == object.id;
                     });
-                    if(x != undefined)
+                    if (x != undefined)
                         convertedLands.push(x);
                 });
 
-                    res.json(convertedLands);
-                }
-            });
-        }).catch(function (error) {
-            res.send(error);
-        })
-    });
+                res.json(convertedLands);
+            }
+        });
+    }).catch(function (error) {
+        res.send(error);
+    })
+});
 
 function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
@@ -328,32 +328,78 @@ router.post('/add', (req, res) => {
 
                             .on('end', function () {
 
-                                console.log(sha256(chunks));
-                                hashes += chunks;
+
+                                hashes += sha256(chunks);
 
                                 var d = new Document({
                                     name: file.name,
                                     hash: sha256(chunks)
                                 });
                                 d.save((err, dRes) => {
-                                    console.log(err);
-                                    console.log(dRes);
+
                                 });
                             })
                     });
                     l.save((err, data) => {
                         if (err)
                             res.status(500).send("data base error");
-                        console.log('added to database');
-                        res.json(data);
-                    })
+                        else {
+                            User.find({_id: land.owner}, (err, result) => {
+
+                                var address = constants.appPublicKey;
+                                var senderPrivateKey =constants.appPrivateKey;
+                                var idland = '' + data._id;
+                                var hashedInfos = '' + sha256(data.owner + data.pins);
+                                var hashDocs = '' + sha256(hashes);
+
+                                var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
+                                var DataPassContract = web3.eth.contract(abi);
+                                var dataPass = DataPassContract.at(constants.contractAddress);
+                                var privateKey = new Buffer(senderPrivateKey, 'hex');
+                                console.log('this '+result.blockchainAddress);
+                                var contactFunction = dataPass.add.getData(String(result[0].blockchainAddress), idland, hashedInfos, hashDocs);
+                                var number = web3.eth.getTransactionCount(address, "pending");
+                                console.log(web3.version);
+                                var rawTx = {
+                                    nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
+                                    gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
+                                    gasLimit: web3.toHex(3000000),
+                                    from: address,
+                                    to: constants.contractAddress, // contract address
+                                    value: '0x00',
+                                    data: String(contactFunction)
+                                };
+
+                                var tx = new Tx(rawTx);
+                                tx.sign(privateKey);
+
+                                var serializedTx = tx.serialize();
+                                var raw = '0x' + serializedTx.toString('hex');
+                                //callback
+                                web3.eth.sendRawTransaction(raw, function (err, data) {
+                                    if (!err)
+
+                                        res.send({
+                                            data,
+                                            result
+                                        });
+
+                                    else
+                                        res.send(err);
+                                });
+
+                            });
+
+                        }
+
+                    });
                 }
             }
         }
+        ;
     });
 });
 
-});
 router.post('/generatToken', function (req, res) {
     jwt.sign(req.body, constants.jwtSecret, {expiresIn: '1h'}, function (err, token) {
         if (!err)
@@ -371,7 +417,6 @@ function verifyToken(req, res, next) {
     } else {
         res.sendStatus(403);
     }
-
 
 
 }
@@ -397,13 +442,11 @@ router.get('/getLandByID/:id', function (req, res) {
         } else {
 
 
-
-
             var children = [];
 
             Lands.find({parent: result._id}, (err, result1) => {
 
-                if(result1){
+                if (result1) {
                     async.forEachOf(result1, (l) => {
                         console.log(l.pins);
                         console.log('here');
@@ -423,8 +466,6 @@ router.get('/getLandByID/:id', function (req, res) {
     })
 
 });
-
-
 
 
 module.exports = router;
