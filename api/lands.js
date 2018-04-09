@@ -19,7 +19,7 @@ var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
 var md5 = require('md5');
-var Document = require('../models/Document.schema');
+
 router.post('/addLand', function (req, res) {
 
         console.log('addLand');
@@ -498,52 +498,57 @@ router.post('/add', (req, res) => {
                     l.save((err, data) => {
                         if (err)
                             res.status(500).send("data base error");
-                        console.log('added to database');
-                        //bc add
+                        else {
+                            User.find({_id: land.owner}, (err, result) => {
 
-                        /*  var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
-                          var DataPassContract = web3.eth.contract(abi);
-                          var dataPass = DataPassContract.at(constants.contractAddress);
-                          var privateKey = new Buffer('b16f75b5e47b178ee3135a36e4ceb1d11b773614ef4e6b6ab293b28ca05f5f43', 'hex');
+                                var address = constants.appPublicKey;
+                                var senderPrivateKey =constants.appPrivateKey;
+                                var idland = '' + data._id;
+                                var hashedInfos = '' + sha256(data.owner + data.pins);
+                                var hashDocs = '' + sha256(hashes);
 
-                          //get metamask address of user
+                                var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
+                                var DataPassContract = web3.eth.contract(abi);
+                                var dataPass = DataPassContract.at(constants.contractAddress);
+                                var privateKey = new Buffer(senderPrivateKey, 'hex');
+                                console.log('this '+result.blockchainAddress);
+                                var contactFunction = dataPass.add.getData(String(result[0].blockchainAddress), idland, hashedInfos, hashDocs);
+                                var number = web3.eth.getTransactionCount(address, "pending");
+                                console.log(web3.version);
+                                var rawTx = {
+                                    nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
+                                    gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
+                                    gasLimit: web3.toHex(3000000),
+                                    from: address,
+                                    to: constants.contractAddress, // contract address
+                                    value: '0x00',
+                                    data: String(contactFunction)
+                                };
 
-                          //callback for the database get method
+                                var tx = new Tx(rawTx);
+                                tx.sign(privateKey);
 
-                          var contactFunction = dataPass.add.getData(String('0x4a2A778699Dd285171952e142e22Ed379eAE99E6'),data._id,'xxx',hashes);
-                          var number = web3.eth.getTransactionCount('0x4a2A778699Dd285171952e142e22Ed379eAE99E6',"pending");
-                          console.log(web3.version);
-                          var rawTx = {
-                              nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
-                              gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
-                              gasLimit: web3.toHex(3000000),
-                              from: '0x4a2A778699Dd285171952e142e22Ed379eAE99E6',
-                              to: constants.contractAddress, // contract address
-                              value: '0x00',
-                              data: String(contactFunction)
-                          };
+                                var serializedTx = tx.serialize();
+                                var raw = '0x' + serializedTx.toString('hex');
+                                //callback
+                                web3.eth.sendRawTransaction(raw, function (err, data) {
+                                    if (!err)
 
-                          var tx = new Tx(rawTx);
-                          tx.sign(privateKey);
+                                        res.send({
+                                            data,
+                                            result
+                                        });
 
-                          var serializedTx = tx.serialize();
-                          var raw = '0x' + serializedTx.toString('hex');
-                          web3.eth.sendRawTransaction(raw,function (err,bcData) {
-                              if(!err){
-                                  data.transaction=bcData;
-                                  res.send(data);
-                              }
+                                    else
+                                        res.send(err);
+                                });
 
+                            });
 
-                              else
-                                  res.send(err);
-                          });*/
+                        }
 
-                        res.json(data);
-                    })
+                    });
                 }
-
-
             }
 
         }
