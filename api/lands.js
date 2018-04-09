@@ -181,40 +181,40 @@ router.get('/GetLandsFromCache', function (req, res) {
     })
 });
 
-router.get('/GetLandsFromCache/:flag', function (req, res) {
-    getLogsFromCache().then(function (LogResult) {
-        var convertedLands = [];
+router.get('/GetLandsFromCache/:flag',function (req,res) {
+    getLogsFromCache().then(function(LogResult){
+        var convertedLands=[];
         var search = {};
         console.log('here');
-        if (req.params.flag === 'true') {
+        if (req.params.flag === 'true'){
             console.log('if');
-            search = {isForSale: 'true'};
+            search={isForSale:'true'};
         }
-        else {
+        else{
             console.log('else');
-            search = {isForSale: 'false'};
+            search={isForSale:'false'};
         }
 
-        Lands.find(search, function (err, DBResult) {
-            if (err) {
+        Lands.find(search,function (err,DBResult) {
+            if(err){
                 res.send(err);
             }
-            else {
+            else{
                 LogResult.forEach(function (object) {
-                    var x = DBResult.find(function (element) {
-                        return element._id == object.id;
+                    var x   =   DBResult.find(function (element) {
+                        return  element._id==object.id;
                     });
-                    if (x != undefined)
+                    if(x != undefined)
                         convertedLands.push(x);
                 });
 
-                res.json(convertedLands);
-            }
-        });
-    }).catch(function (error) {
-        res.send(error);
-    })
-});
+                    res.json(convertedLands);
+                }
+            });
+        }).catch(function (error) {
+            res.send(error);
+        })
+    });
 
 function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
@@ -328,15 +328,16 @@ router.post('/add', (req, res) => {
 
                             .on('end', function () {
 
-
-                                hashes += sha256(chunks);
+                                console.log(sha256(chunks));
+                                hashes += chunks;
 
                                 var d = new Document({
                                     name: file.name,
                                     hash: sha256(chunks)
                                 });
                                 d.save((err, dRes) => {
-
+                                    console.log(err);
+                                    console.log(dRes);
                                 });
                             })
                     });
@@ -396,10 +397,10 @@ router.post('/add', (req, res) => {
                 }
             }
         }
-        ;
     });
 });
 
+});
 router.post('/generatToken', function (req, res) {
     jwt.sign(req.body, constants.jwtSecret, {expiresIn: '1h'}, function (err, token) {
         if (!err)
@@ -419,6 +420,7 @@ function verifyToken(req, res, next) {
     }
 
 
+
 }
 
 router.get('/users/:address', function (req, res) {
@@ -435,37 +437,43 @@ router.get('/users/:address', function (req, res) {
 });
 router.get('/getLandByID/:id', function (req, res) {
     var id = req.params.id;
-    Lands.findById(id, function (err, result) {
-
+    Lands.find({'_id': id}, function (err, result) {
         if (err) {
             res.send(err);
         } else {
 
+            if (result == null)
+                res.status(404).send();
 
-            var children = [];
 
-            Lands.find({parent: result._id}, (err, result1) => {
+           else{
+                var children = [];
 
-                if (result1) {
-                    async.forEachOf(result1, (l) => {
-                        console.log(l.pins);
-                        console.log('here');
-                        children.push(l);
-                        if (children.length === result1.length) {
-                            result.children = children;
-                            res.send(result);
-                        }
-                    });
-                }
-                else
-                    res.send(result);
-            });
+                Lands.find({parent: result._id}, (err, result1) => {
+
+                    if(result1){
+                        async.forEachOf(result1, (l) => {
+                            console.log(l.pins);
+                            console.log('here');
+                            children.push(l);
+                            if (children.length === result1.length) {
+                                result.children = children;
+                                res.send(result);
+                            }
+                        });
+                    }
+                    else
+                        res.send(result);
+                });
+            }
 
         }
 
     })
 
 });
+
+
 
 
 module.exports = router;
