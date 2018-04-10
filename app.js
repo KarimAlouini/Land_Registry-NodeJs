@@ -24,10 +24,11 @@ app.use(fileUpload());
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(cors());
 app.use(session({
     secret: "fd34s@!@dfa453f3DF#$D&W",
@@ -41,6 +42,9 @@ app.use('/lands', lands);
 app.use('/api/lands', landsApi);
 app.use('/api/landDb', landDbApi);
 app.use('/api/users', require('./api/users'));
+app.use('/api/agent', require('./api/agent'));
+app.use('/api/geocoder', require('./api/geocoder'));
+app.use('/api/browse', require('./api/landBrowser'));
 
 
 // catch 404 and forward to error handler
@@ -58,7 +62,7 @@ app.use(function (err, req, res, next) {
 
     // render the error page
     res.status(err.status || 500);
-    //res.render('error');
+    res.status(err.status).send();
 });
 
 

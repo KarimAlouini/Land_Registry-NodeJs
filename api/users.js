@@ -6,7 +6,7 @@ router.post('/AgentLogin', function (req, res) {
 
     var login = req.body.login;
     var pwd = req.body.pwd;
-    console.log(md5(pwd));
+    //console.log(md5(pwd));
     User.find({'login': login, 'password': md5(pwd)}, function (err, result) {
         if (err) {
             res.send(err);
