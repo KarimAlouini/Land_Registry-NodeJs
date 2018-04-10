@@ -6,21 +6,12 @@ const request = require('request')
 var Web3 = require('web3');
 var jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
-var privateKey = new Buffer('922bd7a49e2496bf1c3c9b27e71eb1439988f80bf5854034be3d0eabd753660b', 'hex');
 const Tx = require('ethereumjs-tx');
 var app = express();
 app.use(bodyParser.json());
 var async = require('async');
-var sha256 = require('sha256');
-var _ = require('underscore');
-var utils = require('../utils/utils');
-var fs = require('fs');
-var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
-var md5 = require('md5');
-var Document = require('../models/Document.schema');
-var ObjectId = require('mongoose').Types.ObjectId;
 
 router.post('/addLand', function (req, res) {
 
@@ -138,18 +129,18 @@ router.post('/addAgent', function (req, res) {
 
 router.get('/AllTransaction', function (req, res) {
     var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
-    var DataPassContract = web3.eth.contract(abi);
-    var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+    var DataPassContract = web3.eth.contract(constants.contractAbi);
+    var dataPass = DataPassContract.at(constants.contractAddress);
     var Event = dataPass.LogReturn({}, {fromBlock: 0, toBlock: 'latest'});
 
 
     Event.get(function (err, logs) {
         if (!err) {
             var transactions = [];
-            for (i = logs.length - 3; i < logs.length; i++) {
+            for (i = logs.length-1 ; i > logs.length-5; i--) {
                 transactions.push({
                     "time": web3.eth.getBlock(logs[i].blockNumber).timestamp,
-                    "blockHash": logs[i].blockHash
+                    "blockHash": logs[i].transactionHash
                 });
             }
             ;
@@ -183,40 +174,7 @@ router.get('/GetLandsFromCache', function (req, res) {
     })
 });
 
-router.get('/GetLandsFromCache/:flag', function (req, res) {
-    getLogsFromCache().then(function (LogResult) {
-        var convertedLands = [];
-        var search = {};
-        console.log('here');
-        if (req.params.flag === 'true') {
-            console.log('if');
-            search = {isForSale: 'true'};
-        }
-        else {
-            console.log('else');
-            search = {isForSale: 'false'};
-        }
 
-        Lands.find(search, function (err, DBResult) {
-            if (err) {
-                res.send(err);
-            }
-            else {
-                LogResult.forEach(function (object) {
-                    var x = DBResult.find(function (element) {
-                        return element._id == object.id;
-                    });
-                    if (x != undefined)
-                        convertedLands.push(x);
-                });
-
-                res.json(convertedLands);
-            }
-        });
-    }).catch(function (error) {
-        res.send(error);
-    })
-});
 
 function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
@@ -280,226 +238,7 @@ router.post('/divide/:id', (req, res) => {
     });
 
 });
-router.post('/add', (req, res) => {
 
-
-    var docs = [];
-
-
-
-    for (key in req.files) {
-        docs.push(req.files[key]);
-    }
-
-    console.log(docs.length);
-
-    var land;
-    try {
-        land = JSON.parse(req.body.land);
-    } catch (e) {
-        res.status(500).send("wrong Json");
-    }
-
-    var pinsHash = sha256(JSON.stringify(land.pins));
-
-    Lands.find({
-        owner: land.owner,
-
-    }, function (err, result) {
-        if (err)
-            res.status(500).send(err);
-        else {
-
-            var notExists = result.every((element) => {
-                var myPins = sha256(JSON.stringify(utils.pickFromArray(element.pins, 'longitude', 'latitude')));
-
-                var a = result.filter((x) => {
-
-                    var myPins = sha256(JSON.stringify(utils.pickFromArray(x.pins, 'longitude', 'latitude')));
-
-                    return myPins === pinsHash;
-                });
-
-                if (a.length > 0) {
-                    res.status(201).json({
-                        code: 1,
-                        message: 'Land already exists'
-                    });
-                    return false;
-                }
-                return true;
-
-
-            });
-
-
-            console.log("exist");
-
-            if (notExists) {
-
-                if (!docs) {
-                    res.status(201).json({
-                        code: 1,
-                        message: 'Documents are required'
-                    });
-                }
-                else {
-
-                    var files = [];
-
-
-
-
-                    var landPath = path.join(__dirname, '..', 'public', 'docs', pinsHash);
-                    if (!fs.existsSync(landPath)) {
-                        fs.mkdirSync(landPath);
-
-
-                    }
-
-
-                    if (isNaN(docs.length)) {
-
-                        files.push(docs);
-                        //if it's single file
-                        docs.mv(path.join(landPath, docs.name), (err) => {
-                            if (err) {
-                                console.log(err);
-                                res.status(500).send("single file");
-
-                            }
-                            else {
-                                files.push(docs);
-                            }
-
-
-                        });
-                    }
-                    else {
-
-                        files = docs;
-                        //if it's an array
-                        async.forEachOf(docs, (element) => {
-
-                            element.mv(path.join(landPath, element.name), (err) => {
-                                if (err) {
-
-
-                                    res.status(500).send("too many files");
-
-                                }
-                                else {
-                                    console.log('no error during upload');
-                                    files.push(element);
-                                }
-
-
-                            });
-                        });
-
-
-                    }
-
-
-
-
-
-                    var l = new Lands(land);
-                    l.documents = [];
-
-                    var hashes = '';
-                    async.forEachOf(files, (file) => {
-
-                        var readStream = fs.createReadStream(path.join(landPath, file.name));
-                        var chunks = '';
-                        readStream.on('data', function (chunk) {
-
-
-                            chunks += chunk;
-                        })
-
-                            .on('end', function () {
-
-
-                                hashes += chunks;
-
-                                var d = new Document({
-                                    name: file.name,
-                                    hash: sha256(chunks)
-
-                                });
-
-                                d.save((err, dRes) => {
-
-                                });
-
-                            })
-                    });
-
-
-                    l.save((err, data) => {
-                        if (err)
-                            res.status(500).send("data base error");
-                        else {
-                            console.log(`owner ${land.owner}`);
-                            User.find({_id: land.owner}, (err, result) => {
-                                console.log('result '+ result);
-                                console.log(`result 0 ${result[0]}`);
-
-                                var address = constants.appPublicKey;
-                                var senderPrivateKey =constants.appPrivateKey;
-                                var idland = '' + data._id;
-                                var hashedInfos = '' + sha256(data.owner + data.pins);
-                                var hashDocs = '' + sha256(hashes);
-
-                                var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
-                                var DataPassContract = web3.eth.contract(abi);
-                                var dataPass = DataPassContract.at(constants.contractAddress);
-                                var privateKey = new Buffer(senderPrivateKey, 'hex');
-
-                                var contactFunction = dataPass.add.getData(String(result[0].blockchainAddress), idland, hashedInfos, hashDocs);
-                                var number = web3.eth.getTransactionCount(address, "pending");
-                                console.log(web3.version);
-                                var rawTx = {
-                                    nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
-                                    gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
-                                    gasLimit: web3.toHex(3000000),
-                                    from: address,
-                                    to: constants.contractAddress, // contract address
-                                    value: '0x00',
-                                    data: String(contactFunction)
-                                };
-
-                                var tx = new Tx(rawTx);
-                                tx.sign(privateKey);
-
-                                var serializedTx = tx.serialize();
-                                var raw = '0x' + serializedTx.toString('hex');
-                                //callback
-                                web3.eth.sendRawTransaction(raw, function (err, data) {
-                                    if (!err)
-
-                                        res.send({
-                                            data,
-                                            result
-                                        });
-
-                                    else
-                                        res.send(err);
-                                });
-
-                            });
-
-                        }
-
-                    });
-                }
-            }
-        }
-    });
-
-
-});
 router.post('/generatToken', function (req, res) {
     jwt.sign(req.body, constants.jwtSecret, {expiresIn: '1h'}, function (err, token) {
         if (!err)
@@ -508,12 +247,6 @@ router.post('/generatToken', function (req, res) {
 });
 
 
-router.get('/xx', (req, res) => {
-    console.log(req.sessionID);
-    console.log('here');
-    res.send('hi');
-
-});
 
 
 function verifyToken(req, res, next) {
