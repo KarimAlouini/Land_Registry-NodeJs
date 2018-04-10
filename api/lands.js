@@ -140,18 +140,18 @@ router.post('/addAgent', function (req, res) {
 
 router.get('/AllTransaction', function (req, res) {
     var web3 = new Web3(new Web3.providers.HttpProvider(constants.providerAddress));
-    var DataPassContract = web3.eth.contract(abi);
-    var dataPass = DataPassContract.at('0x9826c4ba142c1e32d74405eba6b2eb3d65cd253b');
+    var DataPassContract = web3.eth.contract(constants.contractAbi);
+    var dataPass = DataPassContract.at(constants.contractAddress);
     var Event = dataPass.LogReturn({}, {fromBlock: 0, toBlock: 'latest'});
 
 
     Event.get(function (err, logs) {
         if (!err) {
             var transactions = [];
-            for (i = logs.length - 3; i < logs.length; i++) {
+            for (i = logs.length-1 ; i > logs.length-5; i--) {
                 transactions.push({
                     "time": web3.eth.getBlock(logs[i].blockNumber).timestamp,
-                    "blockHash": logs[i].blockHash
+                    "blockHash": logs[i].transactionHash
                 });
             }
             ;
