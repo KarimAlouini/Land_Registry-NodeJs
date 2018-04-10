@@ -71,10 +71,11 @@ router.get('/getCities/:city', (req, res) => {
 router.get('/', (req, res) => {
 
     cacheManager.getAllLands((result) => {
+
         if (result.code === 0)
             res.send(result.data)
         else
-            res.status(401).send;
+            res.status(401).send(result.error);
     })
 });
 

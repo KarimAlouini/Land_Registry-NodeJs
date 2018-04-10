@@ -26,7 +26,7 @@ module.exports.getAllLands = function (callback) {
         var lands = [];
         console.log(LogResult.length);
         async.forEachOf(LogResult, (logElement, index) => {
-            Lands.findOne({_id: logElement.id}, (err, land) => {
+            Lands.findOne({_id: logElement.id, 'isForSale': 'true'}, (err, land) => {
                 if (!err) {
                     if (land !== null) {
                         var l = {};
@@ -41,8 +41,8 @@ module.exports.getAllLands = function (callback) {
                     else {
                         if (index === LogResult.length - 1) {
                             callback({
-                                code:0,
-                                data:lands
+                                code: 0,
+                                data: lands
                             });
                         }
                     }
