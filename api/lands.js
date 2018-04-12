@@ -11,6 +11,7 @@ var app = express();
 app.use(bodyParser.json());
 var async = require('async');
 var constants = require('../config/constants');
+var cacheConfig = require('../config/CacheConfig');
 var abi = constants.contractAbi;
 
 router.post('/addLand', function (req, res) {
@@ -178,7 +179,7 @@ router.get('/GetLandsFromCache', function (req, res) {
 
 function getLogsFromCache() {
     return new Promise(function (resolve, reject) {
-        request('http://54.76.154.101:3000',
+        request(cacheConfig.cacheServerAddress,
             function (error, response, body) {
                 if (error) {
                     reject(" problem ");

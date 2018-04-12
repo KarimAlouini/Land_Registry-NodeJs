@@ -1,4 +1,4 @@
-var constants = require('../config/constants');
+var cacheConfig = require('../config/CacheConfig');
 var Lands = require('../models/Land.model');
 var async = require('async');
 var request = require('request');
@@ -21,7 +21,7 @@ function getLogsFromCache(url) {
 };
 
 module.exports.getAllLands = function (callback) {
-    getLogsFromCache(constants.cacheServerAddress).then(function (LogResult) {
+    getLogsFromCache(cacheConfig.cacheServerAddress).then(function (LogResult) {
 
         var lands = [];
         console.log(LogResult.length);
