@@ -217,6 +217,7 @@ router.post('/divide/:id', (req, res) => {
                         parent: land._id
                     });
 
+
                     l.save((err, result) => {
 
 
@@ -278,7 +279,7 @@ router.get('/users/:address', function (req, res) {
 });
 router.get('/getLandByID/:id', function (req, res) {
     var id = req.params.id;
-    Lands.find({'_id': id}, function (err, result) {
+    Lands.findOne({'_id': id}, function (err, result) {
         if (err) {
             res.send(err);
         } else {

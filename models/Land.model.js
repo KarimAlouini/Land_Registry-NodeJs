@@ -62,7 +62,15 @@ var landSchema = new Schema({
 
 
     }],
-    children: []
+    children: [],
+    area:{
+        required:true,
+        type:Number
+    },
+    dateAdded:{
+        type:Date,
+        default:Date.now()
+    }
 
 
 });
