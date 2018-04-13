@@ -197,6 +197,11 @@ router.post('/addUser', (req, res) => {
         }
     )
 });
+router.get('/listUser',(req,res)=>{
+    User.find({},(error,result)=>{
+        res.json(result)
+    })
+});
 
 
 module.exports = router;
