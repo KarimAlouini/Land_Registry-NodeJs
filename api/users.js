@@ -13,7 +13,7 @@ router.post('/AgentLogin', function (req, res) {
         }
         if (result) {
             if (result.length == 0) {
-                res.status(404);
+                res.status(401);
             }
             res.json(result[0]);
         }
