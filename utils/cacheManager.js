@@ -24,10 +24,11 @@ module.exports.getAllLands = function (callback) {
     getLogsFromCache(cacheConfig.cacheServerAddress).then(function (LogResult) {
 
         var lands = [];
-        console.log(LogResult.length);
         async.forEachOf(LogResult, (logElement, index) => {
             Lands.findOne({_id: logElement.id, 'isForSale': 'true'}, (err, land) => {
+
                 if (!err) {
+
                     if (land !== null) {
                         var l = {};
                         l.info = land;
@@ -35,15 +36,19 @@ module.exports.getAllLands = function (callback) {
                         l.hashedInfo = logElement.info.hashedInfo;
 
                         l.hashDocs = logElement.info.hashDocs;
+                        console.log('land');
+
                         lands.push(l);
 
                     }
                     else {
-                        if (index === LogResult.length - 1) {
+
+                        if (index === (LogResult.length - 2)) {
                             callback({
-                                code: 0,
-                                data: lands
-                            });
+                                code:0,
+                                data:lands
+                            })
+
                         }
                     }
                 }
@@ -52,7 +57,7 @@ module.exports.getAllLands = function (callback) {
 
 
         });
-
+        console.log('here');
 
     })
         .catch(function (error) {
