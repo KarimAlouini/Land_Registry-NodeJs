@@ -7,11 +7,12 @@ var mongoose = require('mongoose'),
          required:true
      },
      coords:{
-         lng:{
+
+         lat:{
              type:Number,
              required:true
          },
-         lat:{
+         lng:{
              type:Number,
              required:true
          }

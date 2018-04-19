@@ -45,6 +45,7 @@ app.use('/api/users', require('./api/users'));
 app.use('/api/agent', require('./api/agent'));
 app.use('/api/geocoder', require('./api/geocoder'));
 app.use('/api/browse', require('./api/landBrowser'));
+app.use('/api/cities', require('./api/city'));
 
 
 // catch 404 and forward to error handler

@@ -43,10 +43,10 @@ module.exports.getAllLands = function (callback) {
                     }
                     else {
 
-                        if (index === (LogResult.length - 2)) {
+                        if (index === (LogResult.length - 1)) {
                             callback({
-                                code:0,
-                                data:lands
+                                code: 0,
+                                data: lands
                             })
 
                         }
@@ -69,5 +69,14 @@ module.exports.getAllLands = function (callback) {
         });
 
 
+};
+
+module.exports.getLand = (id) => {
+    getLogsFromCache(`${cacheConfig.cacheServerAddress}/${id}`).then((logResult) => {
+
+    })
+        .catch((error) => {
+
+        });
 };
 
