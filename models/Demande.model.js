@@ -3,7 +3,7 @@ var mongoose = require('mongoose'),
     _ = require('underscore');
 
 
-var landSchema = new Schema({
+var demandeSchema = new Schema({
     seller: {
         type: Schema.ObjectId,
         ref: 'User',
@@ -52,4 +52,4 @@ var landSchema = new Schema({
         default:Date.now()
     }
 });
-module.exports = mongoose.model('Land', landSchema);
+module.exports = mongoose.model('Demande', demandeSchema);
