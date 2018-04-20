@@ -5,6 +5,7 @@ var City = require('../models/City.model');
 var Land = require('../models/Land.model');
 var cacheManager = require('../utils/cacheManager');
 var ObjectId = require('mongoose').Types.ObjectId;
+var geocoderClient = require('../config/Geocoder');
 router.get('/getLandByCity/:id/:flag', (req, res) => {
     var cityId = req.params.id;
     var flag = req.params.flag;
@@ -78,5 +79,11 @@ router.get('/', (req, res) => {
             res.status(401).send(result.error);
     })
 });
+
+router.get('/landsbycity/:city',(req,res)=>{
+
+});
+
+
 
 module.exports = router;
