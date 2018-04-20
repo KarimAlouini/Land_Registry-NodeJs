@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var Lands = require('../models/Land.model');
 var User = require('../models/User.model');
+var Demande = require('../models/Demande.model');
 var Web3 = require('web3');
 var bodyParser = require('body-parser');
 const Tx = require('ethereumjs-tx');
@@ -15,6 +16,7 @@ var path = require('path');
 var constants = require('../config/constants');
 var abi = constants.contractAbi;
 var Document = require('../models/Document.schema');
+var cacheManager = require("../utils/cacheManager");
 
 router.post('/add', (req, res) => {
     var docs = [];
@@ -170,6 +172,7 @@ router.get('/GetLandsFromCache/:flag', function (req, res) {
                 res.send(err);
             }
             else {
+
                 LogResult.forEach(function (object) {
                     var x = DBResult.find(function (element) {
                         return element._id == object.id;
@@ -186,6 +189,14 @@ router.get('/GetLandsFromCache/:flag', function (req, res) {
     })
 });
 
+router.get('/GetLandsFromCache', function (req, res) {
+    cacheManager.getAllLands((data)=>{
+       if (data.code == 0){
+           res.json(data.data);
+       }
+    });
+});
+
 router.post('/addUser', (req, res) => {
     var user = new User(req.body);
     user.password = sha256(user._id + "fd34s@!@dfa453f3DF#$D&W");
@@ -197,6 +208,9 @@ router.post('/addUser', (req, res) => {
         }
     )
 });
+
+
+
 router.get('/listUser',(req,res)=>{
     User.find({},(error,result)=>{
         res.json(result)

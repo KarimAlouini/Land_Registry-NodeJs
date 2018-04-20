@@ -160,6 +160,7 @@ router.get('/GetLandsFromCache', function (req, res) {
                 res.send(err);
             }
             else {
+
                 LogResult.forEach(function (object) {
                     var x = DBResult.find(function (element) {
                         return element._id == object.id;
