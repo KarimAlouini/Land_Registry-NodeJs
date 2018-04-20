@@ -14,6 +14,7 @@ function getLogsFromCache(url) {
                     reject(" problem ");
                 }
                 else {
+                    console.log(body);
                     resolve(JSON.parse(body));
                 }
             })
@@ -28,8 +29,9 @@ module.exports.getAllLands = function (callback) {
             Lands.findOne({_id: logElement.id, 'isForSale': 'true'}, (err, land) => {
 
                 if (!err) {
+                    console.log(land !== null);
+                    if (land != null) {
 
-                    if (land !== null) {
                         var l = {};
                         l.info = land;
                         l.history = logElement.info.history;
@@ -37,22 +39,24 @@ module.exports.getAllLands = function (callback) {
 
                         l.hashDocs = logElement.info.hashDocs;
                         console.log('land');
-
+                        console.log('found a land');
                         lands.push(l);
 
-                    }
-                    else {
 
-                        if (index === (LogResult.length - 1)) {
-                            callback({
-                                code: 0,
-                                data: lands
-                            })
-
-                        }
                     }
+
+
                 }
 
+                if (index === (LogResult.length - 1)) {
+                    console.log(LogResult.length);
+                    console.log(index);
+                    console.log('equals');
+                    return callback({
+                        code: 0,
+                        data: lands
+                    });
+                }
             });
 
 
@@ -71,12 +75,69 @@ module.exports.getAllLands = function (callback) {
 
 };
 
-module.exports.getLand = (id) => {
+module.exports.getLand = (id, callback) => {
+    console.log(`${cacheConfig.cacheServerAddress}/${id}`);
     getLogsFromCache(`${cacheConfig.cacheServerAddress}/${id}`).then((logResult) => {
+        Lands.findOne({_id: logResult.id}, (err, data) => {
+            console.log(logResult.history);
+            let l = {
+                info: data,
+                history: logResult.info.history,
+                hashedInfo: logResult.info.hashedInfo,
+                hashDocs: logResult.info.hashDocs
+            };
+            return callback({
+                code: 0,
+                data: l
+            })
+        });
 
     })
         .catch((error) => {
 
+            callback({
+                code: 1,
+                data: error
+            })
         });
 };
+
+module.exports.getAllLandsNew = (callback) => {
+    getLogsFromCache(cacheConfig.cacheServerAddress).then(function (LogResult) {
+        var convertedLands = [];
+        Lands.find({}, function (err, DBResult) {
+            if (err) {
+                callback({
+                    code: 1,
+                    data: err
+                })
+            }
+            else {
+                LogResult.forEach(function (object) {
+                    var x = DBResult.find(function (element) {
+                        return element._id == object.id;
+                    });
+                    if (x != undefined) {
+                        let l = {};
+                        l.info = x;
+                        convertedLands.push(l);
+                    }
+
+                });
+                callback({
+                    code: 0,
+                    data: convertedLands
+                })
+            }
+        });
+    }).catch(function (error) {
+        callback({
+            code: 1,
+            data: error
+        })
+    })
+};
+
+
+
 

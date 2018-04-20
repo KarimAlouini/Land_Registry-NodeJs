@@ -70,8 +70,7 @@ router.get('/getCities/:city', (req, res) => {
 });
 
 router.get('/', (req, res) => {
-
-    cacheManager.getAllLands((result) => {
+    cacheManager.getAllLandsNew((result) => {
 
         if (result.code === 0)
             res.send(result.data)
@@ -80,10 +79,25 @@ router.get('/', (req, res) => {
     })
 });
 
-router.get('/landsbycity/:city',(req,res)=>{
+router.get('/landfromcache/:id', (req, res) => {
+    cacheManager.getLand(req.params.id, (data) => {
+        console.log(data);
+        if (data.code == 0){
+                res.json(data.data);
+            }
+            else{
+                res.status(401).send(data.data);
+            }
 
+    });
 });
 
+
+router.get('/getfrombc/:id', (req, res) => {
+    cacheManager.getLand(req.params.id, (data) => {
+        res.json(data);
+    });
+});
 
 
 module.exports = router;
