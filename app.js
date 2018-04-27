@@ -16,13 +16,6 @@ var users = require('./routes/users'),
 var landsApi = require('./api/lands');
 var landDbApi = require('./api/landDb');
 const tokensUtil = require('./utils/tokens');
-const constants = require('./config/constants');
-let x = tokensUtil.decodeToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJfaWQiOiI1YWExYjYwNGZlMTM3OTg0NzIwZTk4ZGMiLCJsb2dpbiI6Im5hZGltIiwiYmxvY2tjaGFpbkFkZHJlc3MiOiIweDY3N2VkMDRjYWZhMGI1MzY3ZWIxMzYwN2EyMzY3YTVlODcwYzhiYTIiLCJlbWFpbCI6Im1hdG91c3NpbmFkaW1AZ21haWwuY29tIiwicGFzc3dvcmQiOiI4NDU4M2E0YTI0ZTA0N2FmOGQ3NGY2YzNhOGE0OWZjZiIsImlkQ2FyZCI6IjA5NDkwOTA2NCIsImZOYW1lIjoiTmFkaW0iLCJsTmFtZSI6Ik1hdG91c3NpIiwiaWF0IjoxNTI0Nzk0ODg0LCJleHAiOjE1MjQ3OTg0ODR9.QzcpiVQg1o0OkLOME435ruqFXyzgimt-Mujn0__ycBA");
-//console.log(x);
-
-tokensUtil.generateToken('nadim',(data)=>{
-    console.log(data);
-})
 
 
 // view engine setup
