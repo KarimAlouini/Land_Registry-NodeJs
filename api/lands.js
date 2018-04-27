@@ -29,7 +29,6 @@ router.post('/addLand', function (req, res) {
         var privateKey = new Buffer(senderPrivateKey, 'hex');
         var contactFunction = dataPass.add.getData(String(address), idland, hashedInfos, hashDocs);
         var number = web3.eth.getTransactionCount(address, "pending");
-        console.log(web3.version);
         var rawTx = {
             nonce: number, // nonce is numbre of transaction (done AND pending) by the account : function to get :  web3.eth.getTransactionCount(accountAddress) + pending transactions
             gasPrice: web3.toHex(web3.toWei('1000', 'gwei')),
@@ -138,7 +137,7 @@ router.get('/AllTransaction', function (req, res) {
     Event.get(function (err, logs) {
         if (!err) {
             var transactions = [];
-            for (i = logs.length-1 ; i > logs.length-5; i--) {
+            for (i = logs.length - 1; i > logs.length - 5; i--) {
                 transactions.push({
                     "time": web3.eth.getBlock(logs[i].blockNumber).timestamp,
                     "blockHash": logs[i].transactionHash
@@ -175,7 +174,6 @@ router.get('/GetLandsFromCache', function (req, res) {
         res.send(error);
     })
 });
-
 
 
 function getLogsFromCache() {
@@ -242,15 +240,6 @@ router.post('/divide/:id', (req, res) => {
 
 });
 
-router.post('/generatToken', function (req, res) {
-    jwt.sign(req.body, constants.jwtSecret, {expiresIn: '1h'}, function (err, token) {
-        if (!err)
-            res.json({'token': token});
-    })
-});
-
-
-
 
 function verifyToken(req, res, next) {
     const bearerHeader = req.headers['authorization'];
@@ -289,12 +278,12 @@ router.get('/getLandByID/:id', function (req, res) {
                 res.status(404).send();
 
 
-           else{
+            else {
                 var children = [];
 
                 Lands.find({parent: result._id}, (err, result1) => {
 
-                    if(result1){
+                    if (result1) {
                         async.forEachOf(result1, (l) => {
                             console.log(l.pins);
                             console.log('here');
@@ -315,8 +304,6 @@ router.get('/getLandByID/:id', function (req, res) {
     })
 
 });
-
-
 
 
 module.exports = router;
