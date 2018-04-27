@@ -29,7 +29,7 @@ router.post('/', function (req, res) {
 
 
 });
-router.get('/info/:id', tokensUtil.requireAgent,(req, res,next) => {
+router.get('/info/:id', (req, res, next) => {
     console.log(req);
     User.findOne({_id: req.params.id}, {password: 0}, (err, result) => {
         if (err)
